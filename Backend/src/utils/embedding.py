@@ -19,4 +19,4 @@ async def embed_product(text: str) -> list[float]:
     return embedding.tolist() if hasattr(embedding, "tolist") else list(embedding)
 
 async def embed_query(text: str) -> list[float]:
-    return await embed_text(f'query:{text}')
+    return await embed_product(f'query:{text}')

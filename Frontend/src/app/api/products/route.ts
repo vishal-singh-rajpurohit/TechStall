@@ -23,8 +23,10 @@ export async function GET(request: Request) {
 
   let liveProducts: Product[] = [];
   try {
+    const backendParams = new URLSearchParams();
+    if (search) backendParams.set('search', search);
     const backendUrl = process.env.BACKEND_API_URL || 'http://127.0.0.1:8000';
-    const res = await fetch(`${backendUrl}/api/v1/product/get/products`, {
+    const res = await fetch(`${backendUrl}/api/v1/product/get/products?${backendParams.toString()}`, {
       cache: 'no-store',
     });
     if (res.ok) {

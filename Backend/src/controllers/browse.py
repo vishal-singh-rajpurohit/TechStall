@@ -3,11 +3,11 @@ import math
 from typing import Optional, List
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func, or_, case
 from sqlalchemy.orm import selectinload
 
 from ..models.User import Users, Cart
-from ..models.Products import Products, Category
+from ..models.Products import Products, Category, ProductsEmbeddings
 from ..models.Orders import Orders, OrderItems, StatusEnum
 from ..models.Payment import RazorpayPayment, PaymentStatusEnum
 from ..schema.shop import (
@@ -24,6 +24,7 @@ from ..schema.shop import (
     OrderResponse,
 )
 from ..schema.auth import MessageResponse
+from ..utils.embedding import embed_query
 
 def _format_product_response(p: Products) -> ProductResponse:
     media_list = getattr(p, "media", []) or []
@@ -69,6 +70,7 @@ async def list_products(
     offset: int = 0,
 ) -> List[ProductResponse]:
     """Browse active products with optional category and search filters, including media gallery."""
+
     stmt = (
         select(Products)
         .where(Products.isActive == True)
@@ -83,7 +85,18 @@ async def list_products(
         stmt = stmt.where(Products.caregory_id == category_id)
 
     if search:
-        stmt = stmt.where(Products.title.ilike(f"%{search}%"))
+        embeddings = await embed_query(search)
+
+        stmt = (
+        stmt.outerjoin(ProductsEmbeddings, ProductsEmbeddings.product_id == Products.id)
+        .order_by(
+            case(
+                (ProductsEmbeddings.embedding.is_not(None),
+                 ProductsEmbeddings.embedding.cosine_distance(embeddings)),
+                else_=1.0  # push no-embedding products to the back, but don't exclude them
+            )
+        )
+    )
 
     stmt = stmt.limit(limit).offset(offset)
     result = await db.execute(stmt)

@@ -28,6 +28,17 @@ import { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 
+// Imports stay exactly as in your current file (React hooks, next/*, lucide-react, useCart, AuthModal, Product type, etc.)
+
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
+
+// Accepts both a bare array (FastAPI) and { products: [...] } (wrapped Next route)
+function extractProducts(data: any): Product[] | null {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.products)) return data.products;
+  return null;
+}
+
 export function Header() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -62,39 +73,89 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Base catalog (used for instant suggestions on short queries)
   const [liveProducts, setLiveProducts] = useState<Product[]>([]);
+  // Server-side search results (null = no server search active)
+  const [searchResults, setSearchResults] = useState<Product[] | null>(null);
 
   useEffect(() => {
-    fetch('/api/products?limit=50')
+    const controller = new AbortController();
+    fetch('/api/products?limit=50', { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
-        if (data.products && Array.isArray(data.products) && data.products.length > 0) {
-          setLiveProducts(data.products);
-        }
+        const list = extractProducts(data);
+        if (list && list.length > 0) setLiveProducts(list);
       })
-      .catch(() => {});
+      .catch(() => { });
+    return () => controller.abort();
   }, []);
+
+  // Debounced server search
+  useEffect(() => {
+    const q = searchQuery.trim();
+
+    if (q.length < 3) {
+      setSearchResults(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        console.log("Searching.......")
+        const res = await fetch(
+          `/api/products?search=${encodeURIComponent(q)}&limit=10`,
+          { signal: controller.signal }
+        );
+        if (!res.ok) throw new Error(`Search failed with status ${res.status}`);
+        const data = await res.json();
+        console.log('Search Result: ', data)
+        const list = extractProducts(data);
+        setSearchResults(list ?? []);
+      } catch (e: any) {
+        if (e?.name !== 'AbortError') console.error('Error in searching: ', e);
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [searchQuery]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
     setShowMobileSuggestions(false);
+
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set('q', searchQuery.trim());
     if (selectedCategory !== 'all') params.set('category', selectedCategory);
     router.push(`/products?${params.toString()}`);
   };
 
-  const productSource = liveProducts;
-  const matchingSuggestions = searchQuery.trim().length > 0
-    ? productSource.filter((p) => {
-        const matchesQuery = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.category.toLowerCase().includes(searchQuery.toLowerCase());
+  const query = searchQuery.trim().toLowerCase();
+
+  const matchingSuggestions: Product[] = (() => {
+    if (query.length === 0) return [];
+
+    // Server results are already matched to the query, so only apply the category filter.
+    // For short queries, filter the base catalog on the client.
+    const usingServerResults = searchResults !== null;
+    const source = usingServerResults ? searchResults! : liveProducts;
+
+    return source
+      .filter((p) => {
+        const matchesQuery = usingServerResults
+          ? true
+          : (p.title?.toLowerCase().includes(query) ||
+            p.brand?.toLowerCase().includes(query) ||
+            p.category?.toLowerCase().includes(query));
         const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
         return matchesQuery && matchesCategory;
-      }).slice(0, 5)
-    : [];
+      })
+      .slice(0, 5);
+  })();
 
   return (
     <>
@@ -182,7 +243,7 @@ export function Header() {
                         className="flex items-center space-x-3 p-3 hover:bg-slate-50 transition-colors"
                       >
                         <div className="relative w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0">
-                          <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
+                          <Image src={item.images?.[0] || FALLBACK_IMAGE} alt={item.title} fill className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="text-xs font-semibold text-slate-900 truncate">{item.title}</h4>
@@ -254,7 +315,7 @@ export function Header() {
                   >
                     <div className="relative w-8 h-8 rounded-full overflow-hidden ring-2 ring-brand-500/50">
                       <Image
-                        src={session.user.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+                        src={session.user.image || FALLBACK_IMAGE}
                         alt={session.user.name || 'User'}
                         fill
                         className="object-cover"
@@ -386,7 +447,7 @@ export function Header() {
                       className="flex items-center space-x-2.5 p-2.5 hover:bg-slate-50 transition-colors"
                     >
                       <div className="relative w-10 h-10 rounded-lg bg-slate-100 overflow-hidden shrink-0">
-                        <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
+                        <Image src={item.images?.[0] || FALLBACK_IMAGE} alt={item.title} fill className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-xs font-semibold text-slate-900 truncate">{item.title}</h4>
@@ -555,7 +616,7 @@ export function Header() {
                   <div className="flex items-center space-x-2.5">
                     <div className="relative w-8 h-8 rounded-full overflow-hidden ring-2 ring-brand-500/40">
                       <Image
-                        src={session.user.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+                        src={session.user.image || FALLBACK_IMAGE}
                         alt={session.user.name || 'User'}
                         fill
                         className="object-cover"

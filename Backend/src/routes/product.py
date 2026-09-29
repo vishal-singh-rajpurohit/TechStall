@@ -15,6 +15,7 @@ from ..controllers import browse, review, auth
 from ..models.User import Users
 from ..db.desp import get_db
 
+
 router = APIRouter(tags=["PRODUCT"])
 
 

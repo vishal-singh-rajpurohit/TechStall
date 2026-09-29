@@ -353,6 +353,7 @@ async def new_product(
 ) -> dict:
     """Create a new product listing owned by the seller, storing media in the media table via Cloudinary."""
     category_id = payload.category_id
+    cat_obj = None
 
     # If category title is provided but not category_id, find or create category
     if not category_id and payload.category_title:
@@ -479,17 +480,14 @@ async def new_product(
     new_prod.images = image_urls
     if media_records:
         db.add_all(media_records)
-    
-
-    print("Getting embedding.......")
 
     # Generating Embedding
     try:
-        
+        category_name = cat_obj.title if cat_obj else "Uncategorized"
         desctiption_text = f"""
         title: {new_prod.title},
         description: {new_prod.description},
-        category: {cat_obj.title},
+        category: {category_name},
         brand: {new_prod.brand},
         specifications: {new_prod.specifications},
         price: {new_prod.price},
@@ -504,7 +502,7 @@ async def new_product(
         db.add(new_embedding)
 
     except Exception as e:
-        print("Error in Embedding: ", e)
+        logger.error(f"Embedding generation failed for product {new_prod.id}: {e}")
 
 
     await db.commit()
