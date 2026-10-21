@@ -1,9 +1,12 @@
 import uuid
 import json
+import logging
 from typing import Optional, Any, List
+
+logger = logging.getLogger(__name__)
 from fastapi import Request, Response, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, func
 from sqlalchemy.orm import selectinload
 
 from ..models.Seller import Seller
@@ -36,13 +39,15 @@ async def get_current_seller_optional(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> Optional[Seller]:
-    """Retrieve current seller from seller_access_token cookie or Authorization header, or None if unauthenticated."""
-    token: Optional[str] = request.cookies.get("seller_access_token") or request.cookies.get("access_token")
+    """Retrieve current seller from Authorization header or cookie, or None if unauthenticated."""
+    token: Optional[str] = None
+
+    auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
+    if auth_header and auth_header.lower().startswith("bearer "):
+        token = auth_header.split(" ", 1)[1].strip()
 
     if not token:
-        auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
-        if auth_header and auth_header.lower().startswith("bearer "):
-            token = auth_header.split(" ", 1)[1].strip()
+        token = request.cookies.get("seller_access_token") or request.cookies.get("access_token")
 
     if not token:
         return None
@@ -93,7 +98,8 @@ async def register(
     db: AsyncSession,
 ) -> SellerAuthResponse:
     """Register a new seller, hash password, create DB record, and set auth cookies."""
-    stmt = select(Seller).where(Seller.email == payload.email)
+    clean_email = payload.email.strip().lower()
+    stmt = select(Seller).where(func.lower(Seller.email) == clean_email)
     result = await db.execute(stmt)
     existing_seller = result.scalar_one_or_none()
 
@@ -106,8 +112,8 @@ async def register(
     password_hashed = hash_password(payload.password)
 
     new_seller = Seller(
-        name=payload.name,
-        email=payload.email,
+        name=payload.name.strip(),
+        email=clean_email,
         password_hash=password_hashed,
         mobile_number=payload.mobile_number,
         address=payload.address,
@@ -150,7 +156,8 @@ async def login(
     db: AsyncSession,
 ) -> SellerAuthResponse:
     """Authenticate seller credentials, issue tokens, and set auth cookies."""
-    stmt = select(Seller).where(Seller.email == payload.email)
+    clean_email = payload.email.strip().lower()
+    stmt = select(Seller).where(func.lower(Seller.email) == clean_email)
     result = await db.execute(stmt)
     seller = result.scalar_one_or_none()
 
@@ -695,7 +702,7 @@ async def modify_product(
     await db.refresh(prod)
 
     # Re-fetch with media relation
-    prod_stmt = select(Products).where(Products.id == prod.id).options(selectinload(Products.media))
+    prod_stmt = select(Products).where(Products.id == prod.id).options(selectinload(Products.media), selectinload(Products.category))
     prod_res = await db.execute(prod_stmt)
     full_prod = prod_res.scalar_one()
 
@@ -707,10 +714,27 @@ async def modify_product(
 
     # Re-sync vector embeddings for semantic search
     try:
-        await embed_product(full_prod, db)
+        category_name = full_prod.category.title if full_prod.category else "Uncategorized"
+        desc_text = f"""
+        title: {full_prod.title},
+        description: {full_prod.description},
+        category: {category_name},
+        price: {full_prod.price},
+        selling_price: {full_prod.selling_price}
+        """
+        embedding = await embed_product(desc_text)
+        emb_stmt = select(ProductsEmbeddings).where(ProductsEmbeddings.product_id == full_prod.id)
+        emb_res = await db.execute(emb_stmt)
+        existing_emb = emb_res.scalar_one_or_none()
+        if existing_emb:
+            existing_emb.embedding = embedding
+        else:
+            db.add(ProductsEmbeddings(product_id=full_prod.id, embedding=embedding))
+        await db.commit()
     except Exception as e:
-        print(f"Embedding sync notice for product {full_prod.id}: {e}")
+        logger.warning(f"Embedding sync notice for product {full_prod.id}: {e}")
 
+    prod_images = [m.url for m in full_prod.media if m.media_type == "image"] or full_prod.images
     return {
         "message": "Product updated successfully",
         "product_id": str(full_prod.id),
@@ -718,10 +742,18 @@ async def modify_product(
         "stock": full_prod.stock,
         "selling_price": full_prod.selling_price,
         "isActive": full_prod.isActive,
-        "images": [m.url for m in full_prod.media if m.media_type == "image"] or full_prod.images,
+        "images": prod_images,
         "videos": [m.url for m in full_prod.media if m.media_type == "video"],
         "media": [_format_media_item(m) for m in full_prod.media],
         "status": "OK",
+        "product": {
+            "id": str(full_prod.id),
+            "title": full_prod.title,
+            "stock": full_prod.stock,
+            "selling_price": full_prod.selling_price,
+            "isActive": full_prod.isActive,
+            "images": prod_images,
+        },
     }
 
 
@@ -755,7 +787,11 @@ async def delete_product(
             detail="Product not found",
         )
 
-    prod.seller_id = current_seller.id
+    if prod.seller_id and prod.seller_id != current_seller.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to modify this product",
+        )
     prod.isActive = False
     await db.commit()
 
@@ -777,7 +813,10 @@ async def get_seller_products(
         stmt = (
             select(Products)
             .where(Products.id == product_id)
-            .options(selectinload(Products.media))
+            .options(
+                selectinload(Products.media),
+                selectinload(Products.category),
+            )
         )
         res = await db.execute(stmt)
         prod = res.scalar_one_or_none()
@@ -795,6 +834,8 @@ async def get_seller_products(
             "videos": [m.url for m in prod.media if m.media_type == "video"],
             "media": [_format_media_item(m) for m in prod.media],
             "description": prod.description,
+            "specifications": prod.specifications,
+            "category": prod.category.title if prod.category else "monitors",
             "isActive": prod.isActive,
             "category_id": str(prod.caregory_id) if prod.caregory_id else None,
             "created_at": prod.created_at.isoformat() if prod.created_at else None,
@@ -802,22 +843,15 @@ async def get_seller_products(
 
     stmt = (
         select(Products)
-        .where((Products.seller_id == current_seller.id) | (Products.seller_id.is_(None)))
-        .options(selectinload(Products.media))
+        .where(Products.seller_id == current_seller.id)
+        .options(
+            selectinload(Products.media),
+            selectinload(Products.category),
+        )
         .order_by(Products.created_at.desc())
     )
     res = await db.execute(stmt)
     products = res.scalars().all()
-
-    # Fallback to general catalog if current seller doesn't have assigned products yet
-    if not products:
-        fallback_stmt = (
-            select(Products)
-            .options(selectinload(Products.media))
-            .order_by(Products.created_at.desc())
-        )
-        fallback_res = await db.execute(fallback_stmt)
-        products = fallback_res.scalars().all()
 
     return [
         {
@@ -831,6 +865,9 @@ async def get_seller_products(
             "images": [m.url for m in p.media if m.media_type == "image"] or p.images,
             "videos": [m.url for m in p.media if m.media_type == "video"],
             "media": [_format_media_item(m) for m in p.media],
+            "description": p.description,
+            "specifications": p.specifications,
+            "category": p.category.title if p.category else "monitors",
             "isActive": p.isActive,
             "created_at": p.created_at.isoformat() if p.created_at else None,
         }
@@ -866,6 +903,11 @@ async def change_stock(
         "message": "Stock updated successfully",
         "product_id": str(prod.id),
         "stock": prod.stock,
+        "product": {
+            "id": str(prod.id),
+            "stock": prod.stock,
+            "title": prod.title,
+        },
         "status": "OK",
     }
 
@@ -885,6 +927,7 @@ async def get_seller_orders(
         .options(
             selectinload(Orders.items).selectinload(OrderItems.product),
             selectinload(Orders.payments),
+            selectinload(Orders.user),
         )
         .distinct()
         .order_by(Orders.created_at.desc())
@@ -898,6 +941,8 @@ async def get_seller_orders(
             "id": str(o.id),
             "orderNumber": f"ORD-{str(o.id)[:8].upper()}",
             "userId": str(o.userId),
+            "customerName": o.user.name if o.user and hasattr(o.user, "name") else "Verified Customer",
+            "customerEmail": o.user.email if o.user else "customer@example.com",
             "total": o.total,
             "status": o.status.value if hasattr(o.status, "value") else str(o.status),
             "isVerified": o.isVerified,
@@ -907,6 +952,15 @@ async def get_seller_orders(
             "state": o.state,
             "pin_code": o.pin_code,
             "created_at": o.created_at.isoformat() if o.created_at else None,
+            "payments": [
+                {
+                    "id": str(p.id),
+                    "razorpay_payment_id": p.razorpay_payment_id,
+                    "status": p.status.value if hasattr(p.status, "value") else str(p.status),
+                    "amount": p.amount,
+                }
+                for p in o.payments
+            ] if o.payments else [],
             "items": [
                 {
                     "id": str(item.id),
@@ -934,6 +988,7 @@ async def get_seller_order_by_id(
         .options(
             selectinload(Orders.items).selectinload(OrderItems.product),
             selectinload(Orders.payments),
+            selectinload(Orders.user),
         )
     )
     res = await db.execute(stmt)
@@ -946,6 +1001,8 @@ async def get_seller_order_by_id(
         "id": str(order.id),
         "orderNumber": f"ORD-{str(order.id)[:8].upper()}",
         "userId": str(order.userId),
+        "customerName": order.user.name if order.user and hasattr(order.user, "name") else "Verified Customer",
+        "customerEmail": order.user.email if order.user else "customer@example.com",
         "total": order.total,
         "status": order.status.value if hasattr(order.status, "value") else str(order.status),
         "isVerified": order.isVerified,
@@ -955,6 +1012,15 @@ async def get_seller_order_by_id(
         "state": order.state,
         "pin_code": order.pin_code,
         "created_at": order.created_at.isoformat() if order.created_at else None,
+        "payments": [
+            {
+                "id": str(p.id),
+                "razorpay_payment_id": p.razorpay_payment_id,
+                "status": p.status.value if hasattr(p.status, "value") else str(p.status),
+                "amount": p.amount,
+            }
+            for p in order.payments
+        ] if order.payments else [],
         "items": [
             {
                 "id": str(item.id),

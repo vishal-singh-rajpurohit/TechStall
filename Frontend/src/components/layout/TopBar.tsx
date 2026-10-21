@@ -1,67 +1,53 @@
 'use client';
 
 import React from 'react';
-import { MapPin, Phone, ChevronDown, Facebook, Twitter, Instagram, Globe } from 'lucide-react';
+import Link from 'next/link';
+import { Phone, ExternalLink, Zap, ShieldCheck } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
 export function TopBar() {
-  const { currency, setCurrency } = useCart();
+  const { currency } = useCart();
 
   return (
-    <div className="bg-slate-900 text-slate-300 text-xs border-b border-slate-800 hidden md:block">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
-        {/* Left: Contact Info */}
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-1.5 hover:text-white transition-colors cursor-pointer">
-            <MapPin className="w-3.5 h-3.5 text-brand-500" />
-            <span>Tech Park, Electronic City, Bengaluru, India</span>
-          </div>
-          <div className="flex items-center space-x-1.5 hover:text-white transition-colors cursor-pointer">
-            <Phone className="w-3.5 h-3.5 text-brand-500" />
-            <span>Hotline: +91 98765 43210</span>
+    <div className="bg-[#061224] text-slate-300 text-[11px] border-b border-[#122B4F]/80 hidden sm:block select-none">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-8 flex items-center justify-between">
+        {/* Left: Announcement & Value Proposition */}
+        <div className="flex items-center space-x-3">
+          <div className="inline-flex items-center gap-1.5 text-[#FF6B1A] font-semibold">
+            <Zap className="w-3 h-3 text-[#FF6B1A] fill-[#FF6B1A] animate-pulse" />
+            <span>Certified 2026 Hardware</span>
           </div>
         </div>
 
-        {/* Right: Currency, Language, Socials */}
-        <div className="flex items-center space-x-5">
-          {/* Currency Selector */}
-          <div className="relative flex items-center space-x-1 cursor-pointer group">
-            <span className="font-medium text-slate-200">Currency:</span>
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as any)}
-              className="bg-transparent text-white font-semibold cursor-pointer focus:outline-none border-none pr-1"
-            >
-              <option value="INR" className="bg-slate-900 text-white">INR (₹)</option>
-              <option value="USD" className="bg-slate-900 text-white">USD ($)</option>
-              <option value="EUR" className="bg-slate-900 text-white">EUR (€)</option>
-              <option value="GBP" className="bg-slate-900 text-white">GBP (£)</option>
-            </select>
-          </div>
+        {/* Right: Quick Links, Support & Seller Portal */}
+        <div className="flex items-center space-x-4">
+          <a
+            href="tel:+919509075612"
+            className="flex items-center space-x-1.5 text-slate-300 hover:text-white transition-colors"
+          >
+            <Phone className="w-3 h-3 text-[#2563EB]" />
+            <span>Support: +91 95090 75612</span>
+          </a>
 
-          <div className="h-3 w-px bg-slate-700" />
+          <div className="h-3 w-px bg-[#122B4F]" />
 
-          {/* Language Selector */}
-          <div className="flex items-center space-x-1 cursor-pointer hover:text-white transition-colors">
-            <Globe className="w-3.5 h-3.5 text-slate-400" />
-            <span>English</span>
-            <ChevronDown className="w-3 h-3 text-slate-400" />
-          </div>
+          {/* Currency indicator */}
+          <span className="font-bold text-slate-200">
+            {currency === 'INR' ? '₹ INR' : currency}
+          </span>
 
-          <div className="h-3 w-px bg-slate-700" />
+          <div className="h-3 w-px bg-[#122B4F]" />
 
-          {/* Social Links */}
-          <div className="flex items-center space-x-3 text-slate-400">
-            <a href="#" className="hover:text-brand-500 transition-colors" aria-label="Facebook">
-              <Facebook className="w-3.5 h-3.5" />
-            </a>
-            <a href="#" className="hover:text-brand-500 transition-colors" aria-label="Twitter">
-              <Twitter className="w-3.5 h-3.5" />
-            </a>
-            <a href="#" className="hover:text-brand-500 transition-colors" aria-label="Instagram">
-              <Instagram className="w-3.5 h-3.5" />
-            </a>
-          </div>
+          {/* Direct link to Seller Dashboard */}
+          <a
+            href="http://localhost:3001"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-1 text-slate-200 hover:text-[#FF6B1A] font-semibold transition-colors group"
+          >
+            <span>Seller Hub</span>
+            <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#FF6B1A] transition-colors" />
+          </a>
         </div>
       </div>
     </div>

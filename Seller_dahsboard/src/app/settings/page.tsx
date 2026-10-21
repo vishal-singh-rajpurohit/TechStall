@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, Save, ShieldCheck, CreditCard, Bell, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { useSeller } from '@/context/SellerContext';
 
@@ -9,6 +9,10 @@ export default function StoreSettingsPage() {
 
   const [formData, setFormData] = useState({ ...settings });
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  useEffect(() => {
+    setFormData(settings);
+  }, [settings]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

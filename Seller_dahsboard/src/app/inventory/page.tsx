@@ -180,85 +180,102 @@ export default function InventoryHealthPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {displayedProducts.map((p) => {
-                const isLow = p.stockQuantity <= p.lowStockThreshold && p.stockQuantity > 0;
-                const isOut = p.stockQuantity === 0;
+              {displayedProducts.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                    <Boxes className="w-10 h-10 mx-auto mb-2 text-slate-300 stroke-1" />
+                    <p className="text-sm font-semibold text-slate-600">No hardware inventory items found</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Add products to your catalog to track real-time warehouse stock levels.
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                displayedProducts.map((p) => {
+                  const isLow = p.stockQuantity <= p.lowStockThreshold && p.stockQuantity > 0;
+                  const isOut = p.stockQuantity === 0;
 
-                return (
-                  <tr key={p.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="relative w-12 h-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200/60">
-                          <Image src={p.images[0]} alt={p.title} fill className="object-cover" />
+                  return (
+                    <tr key={p.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="relative w-12 h-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200/60">
+                            <Image
+                              src={p.images?.[0] || 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400'}
+                              alt={p.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0 max-w-sm">
+                            <h4 className="font-bold text-slate-900 truncate">{p.title}</h4>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              SKU: {p.sku} • {p.brand}
+                            </span>
+                          </div>
                         </div>
-                        <div className="min-w-0 max-w-sm">
-                          <h4 className="font-bold text-slate-900 truncate">{p.title}</h4>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            SKU: {p.sku} • {p.brand}
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <span className="font-semibold text-slate-700 uppercase text-[10px]">
+                          {p.categoryLabel}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 font-black text-slate-900 text-sm">
+                        {p.stockQuantity} units
+                      </td>
+
+                      <td className="py-3.5 px-4 text-slate-500 font-semibold">
+                        {p.lowStockThreshold} units
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        {isOut ? (
+                          <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
+                            Out of Stock
                           </span>
+                        ) : isLow ? (
+                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                            <AlertTriangle className="w-3 h-3 text-amber-600" />
+                            <span>Low Stock Alert</span>
+                          </span>
+                        ) : (
+                          <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Healthy ({p.stockQuantity})
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Instant Restock Buttons */}
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end space-x-1.5">
+                          <button
+                            onClick={() => restockProduct(p.id, 10)}
+                            className="px-2.5 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 font-bold rounded-lg text-[10px] transition-colors"
+                            title="Add 10 units"
+                          >
+                            +10
+                          </button>
+                          <button
+                            onClick={() => restockProduct(p.id, 25)}
+                            className="px-2.5 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 font-bold rounded-lg text-[10px] transition-colors"
+                            title="Add 25 units"
+                          >
+                            +25
+                          </button>
+                          <button
+                            onClick={() => setSelectedRestockProduct(p)}
+                            className="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg text-[10px] shadow-sm transition-colors"
+                          >
+                            Custom...
+                          </button>
                         </div>
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <span className="font-semibold text-slate-700 uppercase text-[10px]">
-                        {p.categoryLabel}
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 font-black text-slate-900 text-sm">
-                      {p.stockQuantity} units
-                    </td>
-
-                    <td className="py-3.5 px-4 text-slate-500 font-semibold">
-                      {p.lowStockThreshold} units
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      {isOut ? (
-                        <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
-                          Out of Stock
-                        </span>
-                      ) : isLow ? (
-                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                          <AlertTriangle className="w-3 h-3 text-amber-600" />
-                          <span>Low Stock Alert</span>
-                        </span>
-                      ) : (
-                        <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          Healthy ({p.stockQuantity})
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Instant Restock Buttons */}
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end space-x-1.5">
-                        <button
-                          onClick={() => restockProduct(p.id, 10)}
-                          className="px-2.5 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 font-bold rounded-lg text-[10px] transition-colors"
-                          title="Add 10 units"
-                        >
-                          +10
-                        </button>
-                        <button
-                          onClick={() => restockProduct(p.id, 25)}
-                          className="px-2.5 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 font-bold rounded-lg text-[10px] transition-colors"
-                          title="Add 25 units"
-                        >
-                          +25
-                        </button>
-                        <button
-                          onClick={() => setSelectedRestockProduct(p)}
-                          className="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg text-[10px] shadow-sm transition-colors"
-                        >
-                          Custom...
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

@@ -1,0 +1,13 @@
+**/.git
+**/.gitignore
+**/.vscode
+**/.idea
+**/*.log
+**/node_modules
+**/.next
+**/__pycache__
+**/.venv
+**/venv
+**/dist
+**/build
+**/.coverage

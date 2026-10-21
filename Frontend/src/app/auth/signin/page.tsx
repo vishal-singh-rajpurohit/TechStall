@@ -112,17 +112,17 @@ function CustomerLoginForm() {
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
         <Link
           href="/"
-          className="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-500 hover:text-brand-600 mb-6 transition-colors"
+          className="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-500 hover:text-[#2563EB] mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to TechStall Store</span>
         </Link>
 
         <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-orange-50 text-brand-600 flex items-center justify-center mx-auto mb-3 shadow-md shadow-orange-500/10">
+          <div className="w-12 h-12 rounded-2xl bg-[#0B1F3A] text-[#FF6B1A] flex items-center justify-center mx-auto mb-3 shadow-md shadow-[#0B1F3A]/15">
             <Lock className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-black text-[#0B1F3A] tracking-tight">
             {tab === 'signin' ? 'Sign In to TechStall' : 'Create Customer Account'}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
@@ -142,7 +142,7 @@ function CustomerLoginForm() {
               setSuccessMsg('');
             }}
             className={`flex-1 py-2 rounded-xl transition-all ${
-              tab === 'signin' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+              tab === 'signin' ? 'bg-[#0B1F3A] text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Sign In
@@ -155,7 +155,7 @@ function CustomerLoginForm() {
               setSuccessMsg('');
             }}
             className={`flex-1 py-2 rounded-xl transition-all ${
-              tab === 'register' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+              tab === 'register' ? 'bg-[#0B1F3A] text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Register
@@ -188,7 +188,7 @@ function CustomerLoginForm() {
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   placeholder="customer@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                 />
               </div>
             </div>
@@ -203,7 +203,7 @@ function CustomerLoginForm() {
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                 />
               </div>
             </div>
@@ -211,7 +211,7 @@ function CustomerLoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="w-full py-3 bg-[#0B1F3A] hover:bg-[#122B4F] text-white font-bold rounded-xl text-xs transition-colors shadow-md shadow-[#0B1F3A]/20 flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -229,7 +229,7 @@ function CustomerLoginForm() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Alex Mercer"
-                  className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                  className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                 />
               </div>
             </div>
@@ -244,7 +244,7 @@ function CustomerLoginForm() {
                   value={regEmail}
                   onChange={(e) => setRegEmail(e.target.value)}
                   placeholder="alex@example.com"
-                  className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                  className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                 />
               </div>
             </div>
@@ -259,7 +259,7 @@ function CustomerLoginForm() {
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   placeholder="9876543210"
-                  className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium font-mono"
+                  className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium font-mono"
                 />
               </div>
             </div>
@@ -274,7 +274,7 @@ function CustomerLoginForm() {
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                  className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                 />
               </div>
             </div>
@@ -282,7 +282,7 @@ function CustomerLoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition-colors shadow-sm flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="w-full py-3 bg-[#FF6B1A] hover:bg-[#E05609] text-white font-bold rounded-xl text-xs transition-colors shadow-md shadow-[#FF6B1A]/20 flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               <span>{loading ? 'Creating Account...' : 'Create TechStall Account'}</span>
               <ArrowRight className="w-4 h-4" />

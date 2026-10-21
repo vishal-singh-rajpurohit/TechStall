@@ -12,6 +12,7 @@ from ..schema.auth import (
     UserResponse,
     TokenResponse,
     MessageResponse,
+    VerifyRequest,
 )
 from ..utils.security import (
     hash_password,
@@ -34,13 +35,15 @@ async def get_current_user_optional(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> Optional[Users]:
-    """Retrieve current user from access_token cookie or Authorization header, or None if unauthenticated."""
-    token: Optional[str] = request.cookies.get("access_token")
+    """Retrieve current user from Authorization header or access_token cookie, or None if unauthenticated."""
+    token: Optional[str] = None
+
+    auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
+    if auth_header and auth_header.lower().startswith("bearer "):
+        token = auth_header.split(" ", 1)[1].strip()
 
     if not token:
-        auth_header = request.headers.get("Authorization") or request.headers.get("authorization")
-        if auth_header and auth_header.lower().startswith("bearer "):
-            token = auth_header.split(" ", 1)[1].strip()
+        token = request.cookies.get("access_token")
 
     if not token:
         return None
@@ -64,7 +67,6 @@ async def get_current_user_optional(
         return None
 
     return user
-
 
 async def get_current_user(
     request: Request,

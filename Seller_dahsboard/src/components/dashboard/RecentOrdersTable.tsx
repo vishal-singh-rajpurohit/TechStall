@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ShoppingCart, ArrowRight, Eye, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, ArrowRight, Eye, Package } from 'lucide-react';
 import { useSeller } from '@/context/SellerContext';
 import { OrderStatus } from '@/types/seller';
 
@@ -51,69 +51,81 @@ export function RecentOrdersTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {recent.map((order) => {
-              const badge = statusBadges[order.status];
-              return (
-                <tr key={order.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3 px-3 font-bold text-slate-900">
-                    <Link href="/orders" className="hover:text-brand-600">
-                      {order.orderNumber}
-                    </Link>
-                  </td>
-                  <td className="py-3 px-3">
-                    <div className="font-semibold text-slate-800">{order.customerName}</div>
-                    <div className="text-[10px] text-slate-400 truncate max-w-[140px]">
-                      {order.customerEmail}
-                    </div>
-                  </td>
-                  <td className="py-3 px-3 text-slate-600 max-w-[180px] truncate">
-                    {order.items.map((i) => `${i.quantity}x ${i.productTitle}`).join(', ')}
-                  </td>
-                  <td className="py-3 px-3 font-bold text-slate-900">
-                    ₹{order.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span
-                      className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${badge.class}`}
-                    >
-                      {badge.label}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right">
-                    {order.status === 'pending' ? (
-                      <button
-                        onClick={() => updateOrderStatus(order.id, 'processing')}
-                        className="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg text-[10px] transition-colors"
-                      >
-                        Accept Order
-                      </button>
-                    ) : order.status === 'processing' ? (
-                      <button
-                        onClick={() =>
-                          updateOrderStatus(
-                            order.id,
-                            'shipped',
-                            'FedEx Express',
-                            `FDX-${Math.floor(10000000 + Math.random() * 90000000)}`
-                          )
-                        }
-                        className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-lg text-[10px] transition-colors"
-                      >
-                        Dispatch &amp; Track
-                      </button>
-                    ) : (
-                      <Link
-                        href="/orders"
-                        className="text-slate-400 hover:text-slate-700 p-1"
-                        title="View details"
-                      >
-                        <Eye className="w-4 h-4 inline" />
+            {recent.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <Package className="w-10 h-10 mx-auto mb-2 text-slate-300 stroke-1" />
+                  <p className="text-sm font-semibold text-slate-600">No orders received yet</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    When customers purchase your hardware items, incoming orders will appear here.
+                  </p>
+                </td>
+              </tr>
+            ) : (
+              recent.map((order) => {
+                const badge = statusBadges[order.status];
+                return (
+                  <tr key={order.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3 px-3 font-bold text-slate-900">
+                      <Link href="/orders" className="hover:text-brand-600">
+                        {order.orderNumber}
                       </Link>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="font-semibold text-slate-800">{order.customerName}</div>
+                      <div className="text-[10px] text-slate-400 truncate max-w-[140px]">
+                        {order.customerEmail}
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-slate-600 max-w-[180px] truncate">
+                      {order.items.map((i) => `${i.quantity}x ${i.productTitle}`).join(', ')}
+                    </td>
+                    <td className="py-3 px-3 font-bold text-slate-900">
+                      ₹{order.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="py-3 px-3">
+                      <span
+                        className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${badge.class}`}
+                      >
+                        {badge.label}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      {order.status === 'pending' ? (
+                        <button
+                          onClick={() => updateOrderStatus(order.id, 'processing')}
+                          className="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg text-[10px] transition-colors"
+                        >
+                          Accept Order
+                        </button>
+                      ) : order.status === 'processing' ? (
+                        <button
+                          onClick={() =>
+                            updateOrderStatus(
+                              order.id,
+                              'shipped',
+                              'FedEx Express',
+                              `FDX-${Math.floor(10000000 + Math.random() * 90000000)}`
+                            )
+                          }
+                          className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-lg text-[10px] transition-colors"
+                        >
+                          Dispatch &amp; Track
+                        </button>
+                      ) : (
+                        <Link
+                          href="/orders"
+                          className="text-slate-400 hover:text-slate-700 p-1"
+                          title="View details"
+                        >
+                          <Eye className="w-4 h-4 inline" />
+                        </Link>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

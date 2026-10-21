@@ -20,7 +20,7 @@ export interface AuthCheckResult {
  */
 export async function checkAuthentication(req: NextRequest): Promise<AuthCheckResult> {
   try {
-    const secret = process.env.NEXTAUTH_SECRET || 'seller_dashboard_secret_key_super_secure_2026';
+    const secret = process.env.NEXTAUTH_SECRET || 'super-secret-semantic-ecommerce-key-2026';
     const token = await getToken({ req, secret });
 
     if (!token) {
@@ -125,7 +125,9 @@ export async function proxyToBackend(
   endpointPath: string,
   options?: RequestInit
 ): Promise<Response> {
-  const backendBase = process.env.BACKEND_API_URL || 'http://127.0.0.1:8000';
+  const backendBase =
+    process.env.BACKEND_API_URL ||
+    (typeof window === 'undefined' && process.env.PORT ? 'http://backend:8000' : 'http://127.0.0.1:8000');
   const url = `${backendBase}${endpointPath}`;
 
   const authResult = await checkAuthentication(req);

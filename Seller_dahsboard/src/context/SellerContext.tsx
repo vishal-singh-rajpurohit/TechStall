@@ -52,7 +52,7 @@ interface SellerContextType {
 
 const SellerContext = createContext<SellerContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'techstall_seller_dashboard_state_v2';
+const STORAGE_KEY = 'techstall_seller_dashboard_state_v4';
 
 function mapBackendProductToSeller(bp: any): SellerProduct {
   const images = Array.isArray(bp.images) && bp.images.length > 0
@@ -100,9 +100,11 @@ function mapBackendProductToSeller(bp: any): SellerProduct {
 function mapBackendOrderToSeller(bo: any): SellerOrder {
   const statusMap: Record<string, OrderStatus> = {
     CONFORMED: 'processing',
+    CONFIRMED: 'processing',
     PENDING: 'pending',
     SHIPPED: 'shipped',
     DELIVERED: 'delivered',
+    DELIEVERED: 'delivered',
     CANCELLED: 'cancelled',
   };
 
@@ -110,7 +112,7 @@ function mapBackendOrderToSeller(bo: any): SellerOrder {
     ? bo.items.map((item: any) => ({
         productId: String(item.productId || item.product_id || item.product?.id || 'prod-item'),
         productTitle: item.productTitle || item.product?.title || 'Hardware Product Item',
-        category: 'monitors' as HardwareCategory,
+        category: (item.product?.category?.title || item.category || 'monitors').toLowerCase() as HardwareCategory,
         sku: item.sku || item.product?.sku || 'SKU-ITEM',
         quantity: item.quantity || 1,
         price: item.price || item.unitPrice || 0,
@@ -135,8 +137,8 @@ function mapBackendOrderToSeller(bo: any): SellerOrder {
     status: statusMap[bo.status] || 'processing',
     paymentMethod: bo.payments?.[0]?.razorpay_payment_id ? 'Razorpay / Prepaid' : 'Prepaid Card',
     paymentStatus: bo.payments && bo.payments.some((p: any) => p.status === 'SUCCESS') ? 'paid' : (bo.isVerified ? 'paid' : 'pending'),
-    trackingNumber: `TRK-${String(bo.id).slice(0, 8).toUpperCase()}`,
-    carrier: 'DHL Express Global',
+    trackingNumber: bo.tracking_number || `TRK-${String(bo.id).slice(0, 8).toUpperCase()}`,
+    carrier: bo.shipping_carrier || 'DHL Express Global',
     createdAt: bo.created_at || new Date().toISOString(),
     updatedAt: bo.updated_at || new Date().toISOString(),
   };
@@ -167,14 +169,14 @@ export function SellerProvider({ children }: { children: React.ReactNode }) {
 
       // 1. Fetch live products from backend
       const rawProducts = await sellerProductAPI.getProducts(undefined, activeToken || undefined);
-      if (Array.isArray(rawProducts) && rawProducts.length > 0) {
+      if (Array.isArray(rawProducts)) {
         const liveProducts = rawProducts.map(mapBackendProductToSeller);
         setProducts(liveProducts);
         setIsApiConnected(true);
       }
 
       // 2. Fetch live orders from backend
-      const rawOrders = await sellerOrderAPI.getOrders();
+      const rawOrders = await sellerOrderAPI.getOrders(activeToken || undefined);
       if (Array.isArray(rawOrders)) {
         const liveOrders = rawOrders.map(mapBackendOrderToSeller);
         setOrders(liveOrders);
@@ -190,6 +192,12 @@ export function SellerProvider({ children }: { children: React.ReactNode }) {
   // Load local state & trigger backend sync on mount
   useEffect(() => {
     try {
+      // Clean up legacy mock data storage keys
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('techstall_seller_dashboard_state_v2');
+        localStorage.removeItem('techstall_seller_dashboard_state_v3');
+      }
+
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -207,14 +215,26 @@ export function SellerProvider({ children }: { children: React.ReactNode }) {
     refreshFromBackend();
   }, [refreshFromBackend]);
 
-  // Trigger backend refresh when user logs in with NextAuth
+  // Trigger backend refresh when user logs in with NextAuth & update store identity
   useEffect(() => {
-    if (session && (session as any).accessToken) {
-      const token = (session as any).accessToken;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('seller_token', token);
+    if (session) {
+      const shopName = (session.user as any)?.shopName || session.user?.name;
+      const email = session.user?.email;
+      if (shopName || email) {
+        setSettings((prev) => ({
+          ...prev,
+          storeName: shopName || prev.storeName,
+          merchantEmail: email || prev.merchantEmail,
+        }));
       }
-      refreshFromBackend(token);
+
+      if ((session as any).accessToken) {
+        const token = (session as any).accessToken;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('seller_token', token);
+        }
+        refreshFromBackend(token);
+      }
     }
   }, [session, refreshFromBackend]);
 
@@ -373,7 +393,19 @@ export function SellerProvider({ children }: { children: React.ReactNode }) {
     };
 
     try {
-      await sellerOrderAPI.changeOrderStatus(orderId, reverseStatusMap[status] || status.toUpperCase());
+      const activeToken =
+        (session as any)?.accessToken ||
+        (typeof window !== 'undefined' ? localStorage.getItem('seller_token') : null);
+
+      await sellerOrderAPI.changeOrderStatus(
+        orderId,
+        reverseStatusMap[status] || status.toUpperCase(),
+        {
+          shipping_carrier: carrier,
+          tracking_number: trackingNumber,
+        },
+        activeToken || undefined
+      );
     } catch (err) {
       console.warn('Backend order status update error, updated locally:', err);
     }

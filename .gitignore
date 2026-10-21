@@ -112,3 +112,8 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Docker 
+.env.docker.dev
+.env.docker.prod
+DOCKER.md

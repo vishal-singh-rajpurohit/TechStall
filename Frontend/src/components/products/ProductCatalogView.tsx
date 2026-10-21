@@ -87,12 +87,12 @@ export function ProductCatalogView() {
   ];
 
   return (
-    <div className="bg-slate-50 min-h-screen py-8">
+    <div className="bg-[#F7F9FC] min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-200/80 mb-6 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-[#E5E7EB] mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#1F2937] tracking-tight">
               {isWishlistOnly
                 ? 'Your Saved Wishlist'
                 : searchQuery
@@ -101,7 +101,7 @@ export function ProductCatalogView() {
                 ? categories.find((c) => c.id === category)?.label
                 : 'Computer Accessories Catalog'}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-[#6B7280] mt-1">
               Showing {displayedProducts.length} verified products
             </p>
           </div>
@@ -110,20 +110,20 @@ export function ProductCatalogView() {
             {/* Mobile Filter Trigger */}
             <button
               onClick={() => setIsMobileFilterOpen(true)}
-              className="lg:hidden flex items-center space-x-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-sm"
+              className="lg:hidden flex items-center space-x-2 px-4 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-bold text-[#1F2937] shadow-sm hover:border-[#2563EB]"
             >
-              <Filter className="w-4 h-4 text-brand-600" />
+              <Filter className="w-4 h-4 text-[#2563EB]" />
               <span>Filters</span>
             </button>
 
             {/* Sorting */}
-            <div className="flex items-center space-x-2 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm text-xs">
-              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-              <span className="font-semibold text-slate-500">Sort:</span>
+            <div className="flex items-center space-x-2 bg-white px-3 py-2 rounded-xl border border-[#E5E7EB] shadow-sm text-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-[#6B7280]" />
+              <span className="font-semibold text-[#6B7280]">Sort:</span>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as any)}
-                className="bg-transparent font-bold text-slate-800 focus:outline-none cursor-pointer"
+                className="bg-transparent font-bold text-[#1F2937] focus:outline-none cursor-pointer"
               >
                 <option value="popular">Most Popular</option>
                 <option value="price_asc">Price: Low to High</option>
@@ -139,16 +139,16 @@ export function ProductCatalogView() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Desktop Sidebar Filters */}
           <aside className="hidden lg:block space-y-6">
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-sm space-y-6">
+              <div className="flex items-center justify-between pb-3 border-b border-[#E5E7EB]">
                 <div className="flex items-center space-x-2">
-                  <SlidersHorizontal className="w-4 h-4 text-brand-600" />
-                  <span className="text-sm font-extrabold text-slate-900">Filter Hardware</span>
+                  <SlidersHorizontal className="w-4 h-4 text-[#2563EB]" />
+                  <span className="text-sm font-extrabold text-[#1F2937]">Filter Hardware</span>
                 </div>
                 {(category !== 'all' || selectedBrands.length > 0 || minPrice || maxPrice || inStockOnly) && (
                   <button
                     onClick={clearAllFilters}
-                    className="text-xs text-brand-600 hover:text-brand-700 font-bold"
+                    className="text-xs text-[#FF6B1A] hover:text-[#E05507] font-bold"
                   >
                     Reset All
                   </button>
@@ -157,7 +157,7 @@ export function ProductCatalogView() {
 
               {/* Category Filter */}
               <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">
+                <h4 className="text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-3">
                   Categories
                 </h4>
                 <div className="space-y-1.5">
@@ -167,8 +167,8 @@ export function ProductCatalogView() {
                       onClick={() => setCategory(cat.id)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                         category === cat.id
-                          ? 'bg-orange-50 text-brand-600 font-bold'
-                          : 'text-slate-600 hover:bg-slate-50'
+                          ? 'bg-[#EFF6FF] text-[#2563EB] font-bold border border-[#BFDBFE]'
+                          : 'text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F7F9FC]'
                       }`}
                     >
                       <span>{cat.label}</span>
@@ -180,7 +180,7 @@ export function ProductCatalogView() {
 
               {/* Brand Filter */}
               <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">
+                <h4 className="text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-3">
                   Manufacturer
                 </h4>
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
@@ -189,15 +189,15 @@ export function ProductCatalogView() {
                     return (
                       <label
                         key={brand.id}
-                        className="flex items-center space-x-2.5 text-xs text-slate-700 hover:text-slate-900 cursor-pointer select-none"
+                        className="flex items-center space-x-2.5 text-xs text-[#1F2937] hover:text-[#2563EB] cursor-pointer select-none"
                       >
                         <input
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => toggleBrand(brand.name)}
-                          className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300 rounded-md cursor-pointer"
+                          className="w-4 h-4 rounded text-[#2563EB] focus:ring-[#2563EB] border-[#E5E7EB] rounded-md cursor-pointer"
                         />
-                        <span className={isChecked ? 'font-bold text-slate-900' : 'font-medium'}>
+                        <span className={isChecked ? 'font-bold text-[#1F2937]' : 'font-medium text-[#6B7280]'}>
                           {brand.name}
                         </span>
                       </label>
@@ -206,38 +206,94 @@ export function ProductCatalogView() {
                 </div>
               </div>
 
-              {/* Price Filter */}
+              {/* Price Filter with Quick Presets */}
               <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">
+                <h4 className="text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-3">
                   Price Range (₹)
                 </h4>
+                {/* Price Presets */}
+                <div className="grid grid-cols-2 gap-1.5 mb-3">
+                  <button
+                    onClick={() => {
+                      setMinPrice(undefined);
+                      setMaxPrice(5000);
+                    }}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                      minPrice === undefined && maxPrice === 5000
+                        ? 'bg-[#2563EB] text-white shadow-xs'
+                        : 'bg-[#F7F9FC] text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]'
+                    }`}
+                  >
+                    &lt; ₹5,000
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMinPrice(5000);
+                      setMaxPrice(20000);
+                    }}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                      minPrice === 5000 && maxPrice === 20000
+                        ? 'bg-[#2563EB] text-white shadow-xs'
+                        : 'bg-[#F7F9FC] text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]'
+                    }`}
+                  >
+                    ₹5K - ₹20K
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMinPrice(20000);
+                      setMaxPrice(50000);
+                    }}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                      minPrice === 20000 && maxPrice === 50000
+                        ? 'bg-[#2563EB] text-white shadow-xs'
+                        : 'bg-[#F7F9FC] text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]'
+                    }`}
+                  >
+                    ₹20K - ₹50K
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMinPrice(50000);
+                      setMaxPrice(undefined);
+                    }}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                      minPrice === 50000 && maxPrice === undefined
+                        ? 'bg-[#2563EB] text-white shadow-xs'
+                        : 'bg-[#F7F9FC] text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]'
+                    }`}
+                  >
+                    &gt; ₹50,000
+                  </button>
+                </div>
+
                 <div className="flex items-center gap-2 text-xs">
                   <input
                     type="number"
-                    placeholder="Min"
+                    placeholder="Min ₹"
                     value={minPrice !== undefined ? minPrice : ''}
                     onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full px-3 py-2 bg-[#F7F9FC] border border-[#E5E7EB] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] font-semibold text-[#1F2937]"
                   />
-                  <span className="text-slate-400">-</span>
+                  <span className="text-[#6B7280] font-bold">-</span>
                   <input
                     type="number"
-                    placeholder="Max"
+                    placeholder="Max ₹"
                     value={maxPrice !== undefined ? maxPrice : ''}
                     onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    className="w-full px-3 py-2 bg-[#F7F9FC] border border-[#E5E7EB] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] font-semibold text-[#1F2937]"
                   />
                 </div>
               </div>
 
               {/* Stock Filter */}
-              <div className="pt-2 border-t border-slate-100">
-                <label className="flex items-center space-x-2.5 text-xs text-slate-700 cursor-pointer select-none">
+              <div className="pt-2 border-t border-[#E5E7EB]">
+                <label className="flex items-center space-x-2.5 text-xs text-[#1F2937] cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={inStockOnly}
                     onChange={(e) => setInStockOnly(e.target.checked)}
-                    className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300"
+                    className="w-4 h-4 rounded text-[#16A34A] focus:ring-[#16A34A] border-[#E5E7EB]"
                   />
                   <span className="font-semibold">In Stock Items Only</span>
                 </label>
@@ -246,7 +302,65 @@ export function ProductCatalogView() {
           </aside>
 
           {/* Product Grid Area (3 Columns on Large screens, 2 Columns on Mobile) */}
-          <main className="lg:col-span-3">
+          <main className="lg:col-span-3 space-y-4">
+            {/* Active Filter Chips Strip */}
+            {(category !== 'all' || selectedBrands.length > 0 || minPrice !== undefined || maxPrice !== undefined || inStockOnly) && (
+              <div className="flex flex-wrap items-center gap-2 p-3 bg-white border border-[#E5E7EB] rounded-2xl shadow-xs">
+                <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider mr-1">Active:</span>
+
+                {category !== 'all' && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] rounded-full text-xs font-bold">
+                    <span>{categories.find((c) => c.id === category)?.label || category}</span>
+                    <button onClick={() => setCategory('all')} className="hover:text-[#1D4ED8]" title="Remove category filter">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+
+                {selectedBrands.map((b) => (
+                  <span key={b} className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F7F9FC] text-[#1F2937] border border-[#E5E7EB] rounded-full text-xs font-semibold">
+                    <span>{b}</span>
+                    <button onClick={() => toggleBrand(b)} className="hover:text-[#2563EB]" title={`Remove ${b} filter`}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+
+                {(minPrice !== undefined || maxPrice !== undefined) && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F7F9FC] text-[#1F2937] border border-[#E5E7EB] rounded-full text-xs font-semibold">
+                    <span>
+                      ₹{minPrice !== undefined ? minPrice.toLocaleString('en-IN') : '0'} - {maxPrice !== undefined ? `₹${maxPrice.toLocaleString('en-IN')}` : 'Any'}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setMinPrice(undefined);
+                        setMaxPrice(undefined);
+                      }}
+                      className="hover:text-[#2563EB]"
+                      title="Remove price filter"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+
+                {inStockOnly && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#DCFCE7] text-[#16A34A] border border-[#BBF7D0] rounded-full text-xs font-bold">
+                    <span>In Stock Only</span>
+                    <button onClick={() => setInStockOnly(false)} className="hover:text-[#15803D]" title="Remove in-stock filter">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+
+                <button
+                  onClick={clearAllFilters}
+                  className="text-xs font-bold text-[#FF6B1A] hover:text-[#E05507] ml-auto hover:underline"
+                >
+                  Clear All
+                </button>
+              </div>
+            )}
             {isLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -329,7 +443,7 @@ export function ProductCatalogView() {
                       key={cat.id}
                       onClick={() => setCategory(cat.id)}
                       className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
-                        category === cat.id ? 'bg-orange-50 text-brand-600 font-bold' : 'text-slate-600 hover:bg-slate-50'
+                        category === cat.id ? 'bg-[#EFF6FF] text-[#2563EB] font-bold border border-[#BFDBFE]' : 'text-[#6B7280] hover:bg-[#F7F9FC]'
                       }`}
                     >
                       <span>{cat.label}</span>
@@ -341,22 +455,22 @@ export function ProductCatalogView() {
 
               {/* Mobile Brands Filter */}
               <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">Manufacturer</h4>
+                <h4 className="text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-2">Manufacturer</h4>
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
                   {brandsData?.map((brand) => {
                     const isChecked = selectedBrands.includes(brand.name);
                     return (
                       <label
                         key={brand.id}
-                        className="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer"
+                        className="flex items-center space-x-2 text-xs text-[#1F2937] cursor-pointer"
                       >
                         <input
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => toggleBrand(brand.name)}
-                          className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300"
+                          className="w-4 h-4 rounded text-[#2563EB] focus:ring-[#2563EB] border-[#E5E7EB]"
                         />
-                        <span className={isChecked ? 'font-bold text-slate-900' : 'font-medium'}>
+                        <span className={isChecked ? 'font-bold text-[#1F2937]' : 'font-medium text-[#6B7280]'}>
                           {brand.name}
                         </span>
                       </label>
@@ -367,34 +481,90 @@ export function ProductCatalogView() {
 
               {/* Mobile Price Range */}
               <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">Price Range (₹)</h4>
+                <h4 className="text-xs font-bold text-[#1F2937] uppercase tracking-wider mb-2">Price Range (₹)</h4>
+                {/* Mobile Quick Presets */}
+                <div className="grid grid-cols-2 gap-1.5 mb-2.5">
+                  <button
+                    onClick={() => {
+                      setMinPrice(undefined);
+                      setMaxPrice(5000);
+                    }}
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                      minPrice === undefined && maxPrice === 5000
+                        ? 'bg-[#2563EB] text-white'
+                        : 'bg-[#F7F9FC] text-[#6B7280] hover:bg-[#EFF6FF]'
+                    }`}
+                  >
+                    &lt; ₹5,000
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMinPrice(5000);
+                      setMaxPrice(20000);
+                    }}
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                      minPrice === 5000 && maxPrice === 20000
+                        ? 'bg-[#2563EB] text-white'
+                        : 'bg-[#F7F9FC] text-[#6B7280] hover:bg-[#EFF6FF]'
+                    }`}
+                  >
+                    ₹5K - ₹20K
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMinPrice(20000);
+                      setMaxPrice(50000);
+                    }}
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                      minPrice === 20000 && maxPrice === 50000
+                        ? 'bg-[#2563EB] text-white'
+                        : 'bg-[#F7F9FC] text-[#6B7280] hover:bg-[#EFF6FF]'
+                    }`}
+                  >
+                    ₹20K - ₹50K
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMinPrice(50000);
+                      setMaxPrice(undefined);
+                    }}
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                      minPrice === 50000 && maxPrice === undefined
+                        ? 'bg-[#2563EB] text-white'
+                        : 'bg-[#F7F9FC] text-[#6B7280] hover:bg-[#EFF6FF]'
+                    }`}
+                  >
+                    &gt; ₹50,000
+                  </button>
+                </div>
+
                 <div className="flex items-center gap-2 text-xs">
                   <input
                     type="number"
                     placeholder="Min"
                     value={minPrice !== undefined ? minPrice : ''}
                     onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#F7F9FC] border border-[#E5E7EB] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] text-[#1F2937]"
                   />
-                  <span className="text-slate-400">-</span>
+                  <span className="text-[#6B7280]">-</span>
                   <input
                     type="number"
                     placeholder="Max"
                     value={maxPrice !== undefined ? maxPrice : ''}
                     onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
+                    className="w-full px-3 py-2 bg-[#F7F9FC] border border-[#E5E7EB] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] text-[#1F2937]"
                   />
                 </div>
               </div>
 
               {/* Mobile In Stock Only */}
-              <div className="pt-2 border-t border-slate-100">
-                <label className="flex items-center space-x-2 text-xs text-slate-700 cursor-pointer">
+              <div className="pt-2 border-t border-[#E5E7EB]">
+                <label className="flex items-center space-x-2 text-xs text-[#1F2937] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={inStockOnly}
                     onChange={(e) => setInStockOnly(e.target.checked)}
-                    className="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300"
+                    className="w-4 h-4 rounded text-[#16A34A] focus:ring-[#16A34A] border-[#E5E7EB]"
                   />
                   <span className="font-semibold">In Stock Items Only</span>
                 </label>
@@ -403,7 +573,7 @@ export function ProductCatalogView() {
 
             <button
               onClick={() => setIsMobileFilterOpen(false)}
-              className="w-full mt-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md transition-colors"
+              className="w-full mt-6 py-3 bg-[#FF6B1A] hover:bg-[#E05507] text-white font-bold rounded-xl text-xs shadow-md transition-colors active:scale-95"
             >
               Apply Filters ({displayedProducts.length} Results)
             </button>

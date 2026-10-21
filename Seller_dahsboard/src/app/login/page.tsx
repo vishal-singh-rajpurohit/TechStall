@@ -56,7 +56,11 @@ function SellerLoginForm() {
       });
 
       if (res?.error) {
-        setError(res.error || 'Invalid merchant credentials. Please check your email and password.');
+        if (res.error.toLowerCase().includes('fetch failed') || res.error.toLowerCase().includes('unreachable')) {
+          setError('Backend API service unreachable. Please ensure the backend server is running.');
+        } else {
+          setError(res.error || 'Invalid merchant credentials. Please check your email and password.');
+        }
       } else {
         try {
           const session = await getSession();
@@ -66,8 +70,7 @@ function SellerLoginForm() {
         } catch {
           // fallback
         }
-        router.push(callbackUrl);
-        router.refresh();
+        window.location.href = callbackUrl;
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred during sign in.');
@@ -110,12 +113,11 @@ function SellerLoginForm() {
       });
 
       if (loginRes?.error) {
-        setError('Account created, but automatic sign in failed. Please log in manually.');
+        setError('Account created! Please enter your password to sign in.');
         setMode('login');
         setLoginEmail(regEmail);
       } else {
-        router.push(callbackUrl);
-        router.refresh();
+        window.location.href = callbackUrl;
       }
     } catch (err: any) {
       setError(err.message || 'Registration failed. Email or shop name may already be in use.');
@@ -125,19 +127,19 @@ function SellerLoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0B1F3A] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background Decorative Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-brand-600/20 via-amber-500/10 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-[#2563EB]/15 via-[#FF6B1A]/10 to-transparent blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex items-center justify-center space-x-2.5 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#FF6B1A] to-[#FF8C42] flex items-center justify-center text-white shadow-lg shadow-[#FF6B1A]/25">
             <Cpu className="w-7 h-7" />
           </div>
           <div>
             <div className="flex items-center">
               <span className="text-2xl font-black tracking-tight text-white">Tech</span>
-              <span className="text-2xl font-black tracking-tight text-brand-500">Stall</span>
+              <span className="text-2xl font-black tracking-tight text-[#FF6B1A]">Stall</span>
             </div>
             <span className="text-[10px] uppercase tracking-widest font-extrabold text-slate-400">
               Merchant Portal
@@ -155,7 +157,7 @@ function SellerLoginForm() {
         </p>
 
         {/* Tab Switcher */}
-        <div className="mt-6 flex bg-slate-900/90 p-1 rounded-2xl border border-slate-800 text-xs font-bold">
+        <div className="mt-6 flex bg-[#071527] p-1 rounded-2xl border border-[#122B4F] text-xs font-bold">
           <button
             type="button"
             onClick={() => {
@@ -165,7 +167,7 @@ function SellerLoginForm() {
             }}
             className={`flex-1 py-2.5 rounded-xl transition-all ${
               mode === 'login'
-                ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
+                ? 'bg-[#2563EB] text-white shadow-md shadow-[#2563EB]/25 font-bold'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -180,7 +182,7 @@ function SellerLoginForm() {
             }}
             className={`flex-1 py-2.5 rounded-xl transition-all ${
               mode === 'register'
-                ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
+                ? 'bg-[#2563EB] text-white shadow-md shadow-[#2563EB]/25 font-bold'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -190,7 +192,7 @@ function SellerLoginForm() {
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4 sm:px-0">
-        <div className="bg-slate-900/80 backdrop-blur-xl py-8 px-6 sm:px-8 shadow-2xl rounded-3xl border border-slate-800 text-xs text-slate-300">
+        <div className="bg-[#071527] backdrop-blur-xl py-8 px-6 sm:px-8 shadow-2xl rounded-3xl border border-[#122B4F] text-xs text-slate-300">
           {error && (
             <div className="mb-5 p-3.5 bg-red-950/60 border border-red-800/80 text-red-200 rounded-2xl flex items-center space-x-2.5 text-xs animate-in fade-in">
               <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
@@ -220,7 +222,7 @@ function SellerLoginForm() {
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
                     placeholder="merchant@example.com"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#0B1F3A] border border-[#122B4F] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                   />
                 </div>
               </div>
@@ -237,7 +239,7 @@ function SellerLoginForm() {
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 font-medium"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#0B1F3A] border border-[#122B4F] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                   />
                 </div>
               </div>
@@ -246,7 +248,7 @@ function SellerLoginForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 hover:to-amber-400 text-white font-black rounded-xl shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2 text-xs transition-all disabled:opacity-50"
+                  className="w-full py-3 bg-[#FF6B1A] hover:bg-[#E05609] text-white font-black rounded-xl shadow-lg shadow-[#FF6B1A]/25 flex items-center justify-center space-x-2 text-xs transition-all disabled:opacity-50"
                 >
                   <span>{loading ? 'Authenticating...' : 'Sign In to Merchant Dashboard'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -268,7 +270,7 @@ function SellerLoginForm() {
                     value={regShopName}
                     onChange={(e) => setRegShopName(e.target.value)}
                     placeholder="e.g. Apex Hardware Store"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#0B1F3A] border border-[#122B4F] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                   />
                 </div>
               </div>
@@ -285,7 +287,7 @@ function SellerLoginForm() {
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="sales@apexhardware.com"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#0B1F3A] border border-[#122B4F] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                   />
                 </div>
               </div>
@@ -301,7 +303,7 @@ function SellerLoginForm() {
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                    className="w-full px-3.5 py-2.5 bg-[#0B1F3A] border border-[#122B4F] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                   />
                 </div>
                 <div>
@@ -314,7 +316,7 @@ function SellerLoginForm() {
                     value={regConfirmPassword}
                     onChange={(e) => setRegConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                    className="w-full px-3.5 py-2.5 bg-[#0B1F3A] border border-[#122B4F] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                   />
                 </div>
               </div>
@@ -331,7 +333,7 @@ function SellerLoginForm() {
                     value={regPhone}
                     onChange={(e) => setRegPhone(e.target.value)}
                     placeholder="9876543210"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium font-mono"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#0B1F3A] border border-[#122B4F] rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium font-mono"
                   />
                 </div>
               </div>
@@ -345,7 +347,7 @@ function SellerLoginForm() {
                     type="text"
                     value={regCity}
                     onChange={(e) => setRegCity(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                    className="w-full px-3.5 py-2 bg-[#0B1F3A] border border-[#122B4F] rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                   />
                 </div>
                 <div>
@@ -356,7 +358,7 @@ function SellerLoginForm() {
                     type="text"
                     value={regState}
                     onChange={(e) => setRegState(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-950/70 border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium"
+                    className="w-full px-3.5 py-2 bg-[#0B1F3A] border border-[#122B4F] rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-medium"
                   />
                 </div>
               </div>
@@ -365,7 +367,7 @@ function SellerLoginForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-brand-600 to-amber-500 hover:from-brand-500 hover:to-amber-400 text-white font-black rounded-xl shadow-lg shadow-brand-600/30 flex items-center justify-center space-x-2 text-xs transition-all disabled:opacity-50"
+                  className="w-full py-3 bg-[#FF6B1A] hover:bg-[#E05609] text-white font-black rounded-xl shadow-lg shadow-[#FF6B1A]/25 flex items-center justify-center space-x-2 text-xs transition-all disabled:opacity-50"
                 >
                   <span>{loading ? 'Creating Store Account...' : 'Complete Merchant Registration'}</span>
                   <ArrowRight className="w-4 h-4" />

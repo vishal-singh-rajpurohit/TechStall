@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 body {
-  color: #0f172a;
-  background-color: #f8fafc;
+  color: #1F2937;
+  background-color: #F7F9FC;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
 }
@@ -14,14 +14,19 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F7F9FC;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #CBD5E1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #94A3B8;
+}
+
+::selection {
+  background: #2563EB;
+  color: #FFFFFF;
 }
 
 /* Shimmer Loading Animations */

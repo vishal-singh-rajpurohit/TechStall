@@ -52,40 +52,44 @@ export function CartDrawer() {
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         <div className="w-screen max-w-full sm:max-w-md bg-white shadow-2xl flex flex-col">
           {/* Header */}
-          <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-[#F7F9FC]">
             <div className="flex items-center space-x-2">
-              <ShoppingBag className="w-5 h-5 text-brand-600" />
-              <h2 className="text-lg font-bold text-slate-900">Your Shopping Cart</h2>
-              <span className="text-xs bg-brand-100 text-brand-700 font-semibold px-2 py-0.5 rounded-full">
+              <ShoppingBag className="w-5 h-5 text-[#FF6B1A]" />
+              <h2 className="text-lg font-bold text-[#0B1F3A]">Your Shopping Cart</h2>
+              <span className="text-xs bg-[#EFF6FF] text-[#2563EB] font-bold px-2 py-0.5 rounded-full border border-[#DBEAFE]">
                 {items.length} {items.length === 1 ? 'item' : 'items'}
               </span>
             </div>
             <button
               onClick={closeCart}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-full transition-colors"
+              className="p-2 text-slate-400 hover:text-[#0B1F3A] hover:bg-slate-200/50 rounded-full transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Free Shipping Progress Indicator (Ref 2) */}
-          <div className="p-4 bg-orange-50/70 border-b border-orange-100/60 text-xs">
+          <div className="p-4 bg-[#F7F9FC] border-b border-slate-200/80 text-xs">
             <div className="flex items-center justify-between font-medium text-slate-700 mb-1.5">
-              <span className="flex items-center gap-1.5 text-orange-900">
-                <Truck className="w-4 h-4 text-brand-600" />
+              <span className="flex items-center gap-1.5 text-slate-800">
+                <Truck className={`w-4 h-4 ${subtotal >= freeShippingThreshold ? 'text-[#16A34A]' : 'text-[#2563EB]'}`} />
                 {subtotal >= freeShippingThreshold ? (
-                  <strong className="text-emerald-700">You unlocked FREE Worldwide Shipping!</strong>
+                  <strong className="text-[#16A34A]">You unlocked FREE Worldwide Shipping!</strong>
                 ) : (
                   <span>
-                    Add <strong>{formatPrice(remainingForFreeShipping)}</strong> more for FREE Shipping!
+                    Add <strong className="text-[#0B1F3A]">{formatPrice(remainingForFreeShipping)}</strong> more for FREE Shipping!
                   </span>
                 )}
               </span>
-              <span className="font-bold text-orange-800">{Math.round(progressPercent)}%</span>
+              <span className={`font-bold ${subtotal >= freeShippingThreshold ? 'text-[#16A34A]' : 'text-[#2563EB]'}`}>
+                {Math.round(progressPercent)}%
+              </span>
             </div>
-            <div className="w-full h-2 bg-orange-200/60 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-brand-500 rounded-full transition-all duration-500"
+                className={`h-full rounded-full transition-all duration-500 ${
+                  subtotal >= freeShippingThreshold ? 'bg-[#16A34A]' : 'bg-[#2563EB]'
+                }`}
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -98,13 +102,13 @@ export function CartDrawer() {
                 <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400">
                   <ShoppingBag className="w-10 h-10" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-800">Your cart is empty</h3>
+                <h3 className="text-lg font-bold text-[#0B1F3A]">Your cart is empty</h3>
                 <p className="text-sm text-slate-500 max-w-xs mx-auto">
                   Looks like you haven&apos;t added any computer accessories to your cart yet.
                 </p>
                 <button
                   onClick={closeCart}
-                  className="inline-flex items-center space-x-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 transition-colors shadow-sm"
+                  className="inline-flex items-center space-x-2 px-5 py-2.5 bg-[#FF6B1A] hover:bg-[#E05609] text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-[#FF6B1A]/20"
                 >
                   <span>Explore Accessories</span>
                   <ArrowRight className="w-4 h-4" />
@@ -131,13 +135,13 @@ export function CartDrawer() {
                         <Link
                           href={`/products/${item.product.id}`}
                           onClick={closeCart}
-                          className="text-xs font-semibold text-slate-900 hover:text-brand-600 line-clamp-2 transition-colors"
+                          className="text-xs font-semibold text-slate-900 hover:text-[#2563EB] line-clamp-2 transition-colors"
                         >
                           {item.product.title}
                         </Link>
                         <button
                           onClick={() => removeFromCart(item.product.id)}
-                          className="text-slate-400 hover:text-red-500 transition-colors p-1"
+                          className="text-slate-400 hover:text-[#DC2626] transition-colors p-1"
                           aria-label="Remove item"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -198,14 +202,14 @@ export function CartDrawer() {
                 <div className="flex justify-between items-center">
                   <span>Estimated Shipping</span>
                   {shipping === 0 ? (
-                    <span className="font-semibold text-emerald-600">FREE</span>
+                    <span className="font-semibold text-[#16A34A]">FREE</span>
                   ) : (
                     <span className="font-semibold text-slate-900">{formatPrice(shipping)}</span>
                   )}
                 </div>
                 <div className="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-100">
                   <span>Total Due</span>
-                  <span className="text-lg text-brand-600">{formatPrice(total)}</span>
+                  <span className="text-lg font-black text-[#FF6B1A]">{formatPrice(total)}</span>
                 </div>
               </div>
 
@@ -225,8 +229,8 @@ export function CartDrawer() {
                 onClick={handleCheckoutClick}
                 className={`w-full py-3.5 font-bold rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 text-sm ${
                   isAuthenticated
-                    ? 'bg-brand-600 hover:bg-brand-700 text-white shadow-brand-500/25'
-                    : 'bg-gradient-to-r from-amber-600 to-brand-600 hover:from-amber-700 hover:to-brand-700 text-white shadow-amber-500/25'
+                    ? 'bg-[#FF6B1A] hover:bg-[#E05609] text-white shadow-[#FF6B1A]/25'
+                    : 'bg-[#0B1F3A] hover:bg-[#122B4F] text-white shadow-[#0B1F3A]/25'
                 }`}
               >
                 {isAuthenticated ? (
@@ -246,7 +250,7 @@ export function CartDrawer() {
                 <span>Secure 256-Bit SSL Encryption</span>
                 <button
                   onClick={clearCart}
-                  className="hover:text-red-500 transition-colors"
+                  className="hover:text-[#DC2626] transition-colors"
                 >
                   Clear Cart
                 </button>

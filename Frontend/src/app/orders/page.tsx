@@ -261,7 +261,7 @@ export default function CustomerOrdersPage() {
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
                       Total
                     </span>
-                    <span className="text-base font-extrabold text-brand-600">
+                    <span className="text-base font-extrabold text-[#FF6B1A]">
                       {formatPrice(order.total)}
                     </span>
                   </div>
@@ -269,8 +269,8 @@ export default function CustomerOrdersPage() {
                   <div className="flex items-center space-x-2">
                     {/* Payment verification tag */}
                     {isVerified ? (
-                      <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                        <Check className="w-3 h-3 text-blue-600" />
+                      <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#EFF6FF] text-[#2563EB] border border-[#DBEAFE]">
+                        <Check className="w-3 h-3 text-[#2563EB]" />
                         <span>Razorpay Paid</span>
                       </span>
                     ) : (
@@ -283,10 +283,10 @@ export default function CustomerOrdersPage() {
                     <span
                       className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold ${
                         isDelivered
-                          ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                          ? 'bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]'
                           : isCancelled
-                          ? 'bg-red-100 text-red-700 border border-red-200'
-                          : 'bg-amber-100 text-amber-800 border border-amber-200'
+                          ? 'bg-red-50 text-[#DC2626] border border-red-200'
+                          : 'bg-amber-50 text-amber-800 border border-amber-200'
                       }`}
                     >
                       {isDelivered && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -322,7 +322,7 @@ export default function CustomerOrdersPage() {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/products/${it.productId || it.product?.id}`}
-                          className="text-xs sm:text-sm font-semibold text-slate-900 hover:text-brand-600 line-clamp-1 transition-colors"
+                          className="text-xs sm:text-sm font-semibold text-slate-900 hover:text-[#2563EB] line-clamp-1 transition-colors"
                         >
                           {it.product?.title || 'Certified Hardware Item'}
                         </Link>
@@ -352,7 +352,7 @@ export default function CustomerOrdersPage() {
                       <button
                         onClick={() => handlePayWithRazorpay(order)}
                         disabled={payingOrderId === order.id}
-                        className="inline-flex items-center space-x-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition-all disabled:bg-slate-300"
+                        className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#FF6B1A] hover:bg-[#E05609] text-white font-bold rounded-xl text-xs shadow-md shadow-[#FF6B1A]/20 transition-all disabled:bg-slate-300"
                       >
                         {payingOrderId === order.id ? (
                           <>
@@ -372,7 +372,7 @@ export default function CustomerOrdersPage() {
                       <button
                         onClick={() => handleCancelOrder(order.id)}
                         disabled={cancellingId === order.id}
-                        className="text-xs font-semibold text-red-600 hover:text-red-700 hover:underline disabled:text-slate-400 transition-colors"
+                        className="text-xs font-semibold text-[#DC2626] hover:text-red-700 hover:underline disabled:text-slate-400 transition-colors"
                       >
                         {cancellingId === order.id ? 'Cancelling...' : 'Cancel Order'}
                       </button>

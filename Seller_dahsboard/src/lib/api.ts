@@ -1,7 +1,17 @@
 import { ProductMediaItem } from '@/types/seller';
 import { getSession } from 'next-auth/react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
+export function getApiBase(): string {
+  if (typeof window === 'undefined') {
+    // Server-side (Node.js runtime inside Docker or Next.js server)
+    const backendInternal =
+      process.env.BACKEND_API_URL ||
+      (process.env.PORT ? 'http://backend:8000' : 'http://127.0.0.1:8000');
+    return `${backendInternal}/api/v1`;
+  }
+  // Client-side (Browser runtime)
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+}
 
 export function getHeaders(token?: string | null): Record<string, string> {
   const headers: Record<string, string> = {
@@ -55,7 +65,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 // ----------------- SELLER AUTH API -----------------
 export const sellerAuthAPI = {
   checkHealth: async () => {
-    const res = await fetch(`${API_BASE}/auth/seller/`);
+    const res = await fetch(`${getApiBase()}/auth/seller/`);
     return handleResponse<{ status: string; module: string }>(res);
   },
 
@@ -81,7 +91,7 @@ export const sellerAuthAPI = {
       state: payload.state || 'Karnataka',
       pin_code: payload.pin_code || '560025',
     };
-    const res = await fetch(`${API_BASE}/auth/seller/register`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/register`, {
       method: 'POST',
       headers: await getAuthHeaders(),
       credentials: 'include',
@@ -95,7 +105,7 @@ export const sellerAuthAPI = {
   },
 
   login: async (payload: { email?: string; contact_number?: string; password: string }) => {
-    const res = await fetch(`${API_BASE}/auth/seller/login`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/login`, {
       method: 'POST',
       headers: await getAuthHeaders(),
       credentials: 'include',
@@ -109,7 +119,7 @@ export const sellerAuthAPI = {
   },
 
   logout: async () => {
-    const res = await fetch(`${API_BASE}/auth/seller/logout`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/logout`, {
       method: 'POST',
       headers: await getAuthHeaders(),
       credentials: 'include',
@@ -121,7 +131,7 @@ export const sellerAuthAPI = {
   },
 
   refresh: async () => {
-    const res = await fetch(`${API_BASE}/auth/seller/refresh`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/refresh`, {
       method: 'POST',
       headers: await getAuthHeaders(),
       credentials: 'include',
@@ -130,7 +140,7 @@ export const sellerAuthAPI = {
   },
 
   getMe: async (token?: string) => {
-    const res = await fetch(`${API_BASE}/auth/seller/me`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/me`, {
       headers: await getAuthHeaders(token),
       credentials: 'include',
     });
@@ -138,7 +148,7 @@ export const sellerAuthAPI = {
   },
 
   verify: async (token?: string) => {
-    const res = await fetch(`${API_BASE}/auth/seller/verify`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/verify`, {
       method: 'POST',
       headers: await getAuthHeaders(token),
       credentials: 'include',
@@ -152,8 +162,8 @@ export const sellerAuthAPI = {
 export const sellerProductAPI = {
   getProducts: async (productId?: string, token?: string) => {
     const url = productId
-      ? `${API_BASE}/auth/seller/get-product/${productId}`
-      : `${API_BASE}/auth/seller/get-product`;
+      ? `${getApiBase()}/auth/seller/get-product/${productId}`
+      : `${getApiBase()}/auth/seller/get-product`;
     const headers = await getAuthHeaders(token);
     const res = await fetch(url, {
       headers,
@@ -169,7 +179,7 @@ export const sellerProductAPI = {
     order?: number;
   }, token?: string) => {
     const headers = await getAuthHeaders(token);
-    const res = await fetch(`${API_BASE}/auth/seller/upload-media`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/upload-media`, {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -225,7 +235,7 @@ export const sellerProductAPI = {
     }
 
     const headers = await getAuthHeaders(token);
-    const res = await fetch(`${API_BASE}/auth/seller/new-product`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/new-product`, {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -275,7 +285,7 @@ export const sellerProductAPI = {
     if (payload.isActive !== undefined) body.isActive = payload.isActive;
 
     const headers = await getAuthHeaders(token);
-    const res = await fetch(`${API_BASE}/auth/seller/modify-product`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/modify-product`, {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -286,7 +296,7 @@ export const sellerProductAPI = {
 
   deleteProduct: async (productId: string, token?: string) => {
     const headers = await getAuthHeaders(token);
-    const res = await fetch(`${API_BASE}/auth/seller/delete-prodct`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/delete-prodct`, {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -297,7 +307,7 @@ export const sellerProductAPI = {
 
   changeStock: async (productId: string, stock: number, token?: string) => {
     const headers = await getAuthHeaders(token);
-    const res = await fetch(`${API_BASE}/auth/seller/change-stock`, {
+    const res = await fetch(`${getApiBase()}/auth/seller/change-stock`, {
       method: 'POST',
       headers,
       credentials: 'include',
@@ -309,25 +319,43 @@ export const sellerProductAPI = {
 
 // ----------------- SELLER ORDER MANAGEMENT API -----------------
 export const sellerOrderAPI = {
-  getOrders: async () => {
-    const res = await fetch(`${API_BASE}/auth/seller/orders/get-orders`, {
-      headers: getHeaders(),
+  getOrders: async (token?: string) => {
+    const headers = await getAuthHeaders(token);
+    const res = await fetch(`${getApiBase()}/auth/seller/orders/get-orders`, {
+      headers,
+      credentials: 'include',
     });
     return handleResponse<any>(res);
   },
 
-  getOrderById: async (orderId: string) => {
-    const res = await fetch(`${API_BASE}/auth/seller/orders/get/${orderId}`, {
-      headers: getHeaders(),
+  getOrderById: async (orderId: string, token?: string) => {
+    const headers = await getAuthHeaders(token);
+    const res = await fetch(`${getApiBase()}/auth/seller/orders/get/${orderId}`, {
+      headers,
+      credentials: 'include',
     });
     return handleResponse<any>(res);
   },
 
-  changeOrderStatus: async (orderId: string, status: string) => {
-    const res = await fetch(`${API_BASE}/auth/seller/orders/change-order-status`, {
+  changeOrderStatus: async (
+    orderId: string,
+    status: string,
+    options?: { shipping_carrier?: string; tracking_number?: string },
+    token?: string
+  ) => {
+    const headers = await getAuthHeaders(token);
+    const body: Record<string, any> = {
+      order_id: orderId,
+      status,
+    };
+    if (options?.shipping_carrier) body.shipping_carrier = options.shipping_carrier;
+    if (options?.tracking_number) body.tracking_number = options.tracking_number;
+
+    const res = await fetch(`${getApiBase()}/auth/seller/orders/change-order-status`, {
       method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ order_id: orderId, status }),
+      headers,
+      credentials: 'include',
+      body: JSON.stringify(body),
     });
     return handleResponse<any>(res);
   },

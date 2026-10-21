@@ -1,6 +1,6 @@
 import uuid
-from pydantic import BaseModel, EmailStr, model_validator, Field
-from typing import Optional, List
+from pydantic import BaseModel, EmailStr, model_validator, field_validator, Field
+from typing import Optional, List, Any
 from datetime import datetime
 from ..models.Orders import StatusEnum
 
@@ -11,10 +11,10 @@ class SellerRegisterRequest(BaseModel):
     password: str = Field(..., min_length=6)
     conform_password: str = Field(..., min_length=6)
     mobile_number: str = Field(..., max_length=12)
-    address: str = Field(..., max_length=200)
+    address: Optional[str] = Field("Commercial Hub", max_length=200)
     city: str = Field(..., max_length=50)
     state: str = Field(..., max_length=50)
-    pin_code: str = Field(..., max_length=6)
+    pin_code: Optional[str] = Field("560001", max_length=6)
 
     @model_validator(mode="after")
     def verify_passwords_match(self):
@@ -159,3 +159,22 @@ class DeleteProductRequest(BaseModel):
 class ChangeOrderStatusRequest(BaseModel):
     order_id: uuid.UUID
     status: StatusEnum
+    shipping_carrier: Optional[str] = None
+    tracking_number: Optional[str] = None
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def normalize_status(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            v_up = v.upper().strip()
+            if v_up in ("PROCESSING", "CONFIRMED", "CONFORMED"):
+                return StatusEnum.CONFORMED
+            if v_up in ("DELIVERED", "DELIEVERED"):
+                return StatusEnum.DELIEVERED
+            if v_up == "PENDING":
+                return StatusEnum.PENDING
+            if v_up == "SHIPPED":
+                return StatusEnum.SHIPPED
+            if v_up == "CANCELLED":
+                return StatusEnum.CANCELLED
+        return v

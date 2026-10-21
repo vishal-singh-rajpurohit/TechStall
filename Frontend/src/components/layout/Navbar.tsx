@@ -17,26 +17,29 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="bg-brand-600 text-white relative z-30 shadow-md">
+    <nav className="bg-[#0B1F3A] border-b border-[#122B4F] text-slate-200 relative z-30 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-12">
-          {/* Left: All Categories Dropdown Button (Ref 2) */}
+          {/* Left: All Categories Dropdown Button */}
           <div className="relative">
             <button
               onClick={() => setCategoriesOpen(!categoriesOpen)}
-              className="flex items-center space-x-2 bg-brand-700 hover:bg-brand-800 text-white px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-colors shadow-inner"
+              className="flex items-center space-x-2 bg-[#122B4F] hover:bg-[#1A3D6C] text-white border border-[#1E3A8A] px-3.5 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-sm"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-3.5 h-3.5 text-[#FF6B1A]" />
               <span>All Categories</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${categoriesOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${categoriesOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* Dropdown Menu */}
+            {/* Dropdown Menu - Clean White Surface */}
             {categoriesOpen && (
               <div
                 onMouseLeave={() => setCategoriesOpen(false)}
-                className="absolute left-0 top-full mt-1 w-64 bg-white rounded-xl shadow-2xl border border-slate-100 py-2 z-50 text-slate-800 animate-in fade-in"
+                className="absolute left-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-[#E5E7EB] p-2 z-50 text-[#1F2937] animate-in fade-in zoom-in-95"
               >
+                <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-[#6B7280] border-b border-[#E5E7EB] mb-1">
+                  Product Categories
+                </div>
                 {categories.map((cat) => {
                   const Icon = cat.icon;
                   return (
@@ -44,20 +47,20 @@ export function Navbar() {
                       key={cat.name}
                       href={cat.href}
                       onClick={() => setCategoriesOpen(false)}
-                      className="flex items-center justify-between px-4 py-3 hover:bg-orange-50/80 transition-colors group"
+                      className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#EFF6FF] transition-colors group"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-brand-100 group-hover:text-brand-600 transition-colors">
+                        <div className="p-2 rounded-xl bg-[#F7F9FC] text-[#1F2937] group-hover:bg-[#2563EB] group-hover:text-white transition-colors">
                           <Icon className="w-4 h-4" />
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-slate-900 group-hover:text-brand-600 transition-colors">
+                          <div className="text-xs font-bold text-[#1F2937] group-hover:text-[#2563EB] transition-colors">
                             {cat.name}
                           </div>
-                          <div className="text-[10px] text-slate-400">{cat.count}</div>
+                          <div className="text-[10px] text-[#6B7280]">{cat.count}</div>
                         </div>
                       </div>
-                      <ChevronDown className="w-3 h-3 text-slate-400 -rotate-90" />
+                      <ChevronDown className="w-3.5 h-3.5 text-[#6B7280] group-hover:text-[#2563EB] -rotate-90 transition-colors" />
                     </Link>
                   );
                 })}
@@ -66,75 +69,83 @@ export function Navbar() {
           </div>
 
           {/* Middle: Primary Navigation Links */}
-          <div className="hidden md:flex items-center space-x-1 lg:space-x-2 text-xs font-semibold">
+          <div className="hidden md:flex items-center space-x-1 lg:space-x-1.5 text-xs font-semibold">
             <Link
               href="/"
-              className={`px-3 py-1.5 rounded-md hover:bg-brand-700/60 transition-colors ${
-                pathname === '/' ? 'bg-brand-700 font-bold' : ''
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                pathname === '/'
+                  ? 'bg-[#122B4F] text-[#2563EB] font-bold border border-[#2563EB]/40'
+                  : 'text-slate-300 hover:text-white hover:bg-[#122B4F]'
               }`}
             >
               Home
             </Link>
             <Link
               href="/products?category=monitors"
-              className="px-3 py-1.5 rounded-md hover:bg-brand-700/60 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-[#122B4F] transition-all"
             >
-              Monitors
+              4K Monitors
             </Link>
             <Link
               href="/products?category=laptops"
-              className="px-3 py-1.5 rounded-md hover:bg-brand-700/60 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-[#122B4F] transition-all"
             >
               Laptops
             </Link>
             <Link
               href="/products?category=ssds"
-              className="px-3 py-1.5 rounded-md hover:bg-brand-700/60 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-[#122B4F] transition-all"
             >
-              SSDs & Storage
+              SSDs &amp; Storage
             </Link>
             <Link
               href="/products?category=accessories"
-              className="px-3 py-1.5 rounded-md hover:bg-brand-700/60 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-[#122B4F] transition-all"
             >
               Accessories
             </Link>
             <Link
               href="/brands"
-              className="px-3 py-1.5 rounded-md hover:bg-brand-700/60 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-[#122B4F] transition-all"
             >
-              Brands
+              Top Brands
             </Link>
             <Link
               href="/about"
-              className="px-3 py-1.5 rounded-md hover:bg-brand-700/60 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-[#122B4F] transition-all"
             >
               About
             </Link>
+            <Link
+              href="/orders"
+              className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-[#122B4F] transition-all"
+            >
+              Track Order
+            </Link>
           </div>
 
-          {/* Right: Promotional Pills (Ref 2: LIMITED SALE, Best Seller, New Arrival) */}
+          {/* Right: Promotional Pills */}
           <div className="flex items-center space-x-2 text-xs">
             <Link
               href="/products?limitedSale=true"
-              className="flex items-center space-x-1 px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-slate-900 font-extrabold rounded-md shadow-sm transition-all"
+              className="flex items-center space-x-1.5 px-3 py-1 bg-[#FF6B1A] hover:bg-[#E05507] text-white font-extrabold rounded-full shadow-xs transition-all active:scale-95"
             >
-              <Flame className="w-3.5 h-3.5 text-red-600 fill-red-600 animate-pulse" />
+              <Flame className="w-3.5 h-3.5 fill-white" />
               <span>LIMITED SALE</span>
             </Link>
             <Link
               href="/products?sort=popular"
-              className="hidden lg:flex items-center space-x-1 px-2 py-1 text-white/90 hover:text-white hover:bg-brand-700/50 rounded-md transition-colors"
+              className="hidden lg:flex items-center space-x-1 px-2.5 py-1 text-slate-300 hover:text-white hover:bg-[#122B4F] rounded-full transition-colors font-medium text-xs"
             >
-              <Award className="w-3.5 h-3.5" />
-              <span>Best Seller</span>
+              <Award className="w-3.5 h-3.5 text-[#FF6B1A]" />
+              <span>Best Sellers</span>
             </Link>
             <Link
               href="/products?sort=newest"
-              className="hidden lg:flex items-center space-x-1 px-2 py-1 text-white/90 hover:text-white hover:bg-brand-700/50 rounded-md transition-colors"
+              className="hidden lg:flex items-center space-x-1 px-2.5 py-1 text-slate-300 hover:text-white hover:bg-[#122B4F] rounded-full transition-colors font-medium text-xs"
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>New Arrival</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
+              <span>New Arrivals</span>
             </Link>
           </div>
         </div>

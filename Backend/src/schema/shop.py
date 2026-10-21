@@ -1,5 +1,5 @@
 import uuid
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional, List, Any
 from datetime import datetime
 
@@ -106,6 +106,13 @@ class CartResponse(BaseModel):
     items: List[CartItemResponse]
     total_items: int
     subtotal: float
+    total_amount: Optional[float] = None
+
+    @model_validator(mode="after")
+    def sync_total_amount(self) -> "CartResponse":
+        if self.total_amount is None:
+            self.total_amount = self.subtotal
+        return self
 
 
 # ---------------- ORDER & PAYMENT SCHEMAS ----------------
@@ -187,7 +194,17 @@ class CancelOrderRequest(BaseModel):
 
 class CreateReviewRequest(BaseModel):
     rating: int = Field(..., ge=1, le=5, description="Star rating between 1 and 5")
-    content: str = Field(..., min_length=1, max_length=1000, description="Customer review text")
+    content: Optional[str] = Field(None, max_length=1000, description="Customer review text")
+    comment: Optional[str] = None
+    title: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def resolve_content(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if not data.get("content"):
+                data["content"] = data.get("comment") or data.get("title") or "Customer Review"
+        return data
 
 
 class ReviewItemResponse(BaseModel):
@@ -197,8 +214,18 @@ class ReviewItemResponse(BaseModel):
     userName: str
     rating: int
     content: str
+    comment: Optional[str] = None
+    title: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+    @model_validator(mode="after")
+    def sync_aliases(self) -> "ReviewItemResponse":
+        if not self.comment:
+            self.comment = self.content
+        if not self.title:
+            self.title = (self.content[:30] + "...") if self.content else "Customer Review"
+        return self
 
     model_config = {"from_attributes": True}
 
@@ -207,5 +234,14 @@ class ProductReviewsResponse(BaseModel):
     product_id: uuid.UUID
     average_rating: float
     reviews_count: int
+    total_reviews: Optional[int] = None
     rating_breakdown: dict[int, int]
     reviews: List[ReviewItemResponse]
+
+    @model_validator(mode="after")
+    def sync_totals(self) -> "ProductReviewsResponse":
+        if self.total_reviews is None:
+            self.total_reviews = self.reviews_count
+        if self.reviews_count is None:
+            self.reviews_count = self.total_reviews
+        return self

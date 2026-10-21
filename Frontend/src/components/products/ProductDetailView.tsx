@@ -165,21 +165,21 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               <div>
                 {/* Brand & Stock Pill */}
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="px-3 py-1 bg-slate-100 text-slate-700 font-extrabold text-xs rounded-full uppercase tracking-wider">
+                  <span className="px-3 py-1 bg-[#F7F9FC] border border-[#E5E7EB] text-[#1F2937] font-extrabold text-xs rounded-full uppercase tracking-wider">
                     {product.brand}
                   </span>
-                  <div className="flex items-center space-x-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  <div className="flex items-center space-x-1.5 text-xs font-bold text-[#16A34A] bg-[#DCFCE7] border border-[#BBF7D0] px-3 py-1 rounded-full">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#16A34A]" />
                     <span>In Stock ({product.stockQuantity} left)</span>
                   </div>
                 </div>
 
-                {/* Product Title (Ref 1) */}
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-snug mb-3">
+                {/* Product Title - Charcoal */}
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#1F2937] tracking-tight leading-snug mb-3">
                   {product.title}
                 </h1>
 
-                {/* Ratings & SKU (Ref 1) */}
+                {/* Ratings & SKU */}
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
                   <a
                     href="#customer-reviews"
@@ -200,60 +200,60 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                     </div>
                     {currentReviewsCount > 0 ? (
                       <>
-                        <span className="text-sm font-bold text-slate-900">{currentRating.toFixed(1)}</span>
-                        <span className="text-xs text-brand-600 font-semibold underline decoration-dotted">
+                        <span className="text-sm font-bold text-[#1F2937]">{currentRating.toFixed(1)}</span>
+                        <span className="text-xs text-[#2563EB] font-semibold underline decoration-dotted">
                           ({currentReviewsCount} verified {currentReviewsCount === 1 ? 'review' : 'reviews'})
                         </span>
                       </>
                     ) : (
-                      <span className="text-xs font-semibold text-brand-600 underline decoration-dotted">
+                      <span className="text-xs font-semibold text-[#2563EB] underline decoration-dotted">
                         Write first review
                       </span>
                     )}
                   </a>
-                  <span className="text-slate-300 hidden sm:inline">|</span>
-                  <span className="text-xs text-slate-400 font-mono">SKU: {product.sku}</span>
+                  <span className="text-[#E5E7EB] hidden sm:inline">|</span>
+                  <span className="text-xs text-[#6B7280] font-mono">SKU: {product.sku}</span>
                 </div>
 
-                <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+                <p className="text-xs text-[#6B7280] mb-6 leading-relaxed">
                   {product.shortDescription}
                 </p>
 
-                {/* Highlighted Price Pill Container (Ref 1: BDStall style) */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-orange-50/80 border border-orange-200/80 mb-6 flex flex-wrap items-baseline justify-between gap-3">
+                {/* Highlighted Price Pill Container */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#EFF6FF]/70 border border-[#BFDBFE] mb-6 flex flex-wrap items-baseline justify-between gap-3">
                   <div className="flex items-baseline space-x-3">
-                    <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-600 tracking-tight">
+                    <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#FF6B1A] tracking-tight">
                       {formatPrice(product.price)}
                     </span>
                     {product.originalPrice && product.originalPrice > product.price && (
-                      <span className="text-sm sm:text-base text-slate-400 line-through">
+                      <span className="text-sm sm:text-base text-[#6B7280] line-through">
                         {formatPrice(product.originalPrice)}
                       </span>
                     )}
                   </div>
-                  <span className="text-xs font-bold text-orange-900 bg-orange-200/60 px-3 py-1 rounded-full">
+                  <span className="text-xs font-bold text-[#2563EB] bg-[#DBEAFE] px-3 py-1 rounded-full">
                     Best Online Price Guarantee
                   </span>
                 </div>
 
-                {/* Actions: Add to Cart & Hotline Buttons (Responsive Layout) */}
+                {/* Actions: Add to Cart & Buy Now Buttons */}
                 <div className="space-y-3 mb-8">
                   {/* Row 1: Quantity + Wishlist + Share on mobile */}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <div className="flex items-center gap-2">
                       {/* Quantity Picker */}
-                      <div className="flex items-center justify-between border-2 border-slate-200 rounded-2xl px-3 py-2 bg-slate-50 text-sm flex-1 sm:flex-none">
+                      <div className="flex items-center justify-between border-2 border-[#E5E7EB] rounded-2xl px-3 py-2 bg-[#F7F9FC] text-sm flex-1 sm:flex-none">
                         <button
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          className="p-1.5 text-slate-600 hover:text-slate-900 font-bold"
+                          className="p-1.5 text-[#6B7280] hover:text-[#1F2937] font-bold"
                           aria-label="Decrease quantity"
                         >
                           <Minus className="w-4 h-4" />
                         </button>
-                        <span className="px-3 font-bold text-slate-900 w-8 text-center">{quantity}</span>
+                        <span className="px-3 font-bold text-[#1F2937] w-8 text-center">{quantity}</span>
                         <button
                           onClick={() => setQuantity(quantity + 1)}
-                          className="p-1.5 text-slate-600 hover:text-slate-900 font-bold"
+                          className="p-1.5 text-[#6B7280] hover:text-[#1F2937] font-bold"
                           aria-label="Increase quantity"
                         >
                           <Plus className="w-4 h-4" />
@@ -265,18 +265,18 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                         onClick={() => toggleWishlist(product.id)}
                         className={`p-3 rounded-2xl border-2 transition-all shadow-sm ${
                           wishlisted
-                            ? 'border-red-200 bg-red-50 text-red-500'
-                            : 'border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200'
+                            ? 'border-[#FEE2E2] bg-[#FEF2F2] text-[#DC2626]'
+                            : 'border-[#E5E7EB] text-[#6B7280] hover:text-[#DC2626] hover:border-[#FEE2E2]'
                         }`}
                         aria-label="Wishlist"
                       >
-                        <Heart className={`w-5 h-5 ${wishlisted ? 'fill-red-500 text-red-500' : ''}`} />
+                        <Heart className={`w-5 h-5 ${wishlisted ? 'fill-[#DC2626] text-[#DC2626]' : ''}`} />
                       </button>
 
                       {/* Share */}
                       <button
                         onClick={handleShare}
-                        className="p-3 rounded-2xl border-2 border-slate-200 text-slate-400 hover:text-slate-700 transition-colors"
+                        className="p-3 rounded-2xl border-2 border-[#E5E7EB] text-[#6B7280] hover:text-[#1F2937] transition-colors"
                         title="Share product link"
                       >
                         <Share2 className="w-5 h-5" />
@@ -285,17 +285,19 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
 
                     {/* Primary Action Buttons */}
                     <div className="flex-1 grid grid-cols-2 gap-2.5">
+                      {/* ADD TO CART - Deep Navy Primary */}
                       <button
                         onClick={() => addToCart(product, quantity)}
-                        className="w-full py-3.5 px-3 sm:px-5 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-extrabold rounded-2xl shadow-md transition-all flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm uppercase tracking-wider"
+                        className="w-full py-3.5 px-3 sm:px-5 bg-[#0B1F3A] hover:bg-[#122B4F] active:scale-[0.99] text-white font-extrabold rounded-2xl shadow-md transition-all flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm uppercase tracking-wider"
                       >
                         <ShoppingCart className="w-4 h-4 shrink-0" />
                         <span className="truncate">ADD TO CART</span>
                       </button>
 
+                      {/* BUY NOW - Vivid Orange CTA (#FF6B1A) stands out proudly! */}
                       <button
                         onClick={handleBuyNow}
-                        className="w-full py-3.5 px-3 sm:px-5 bg-brand-600 hover:bg-brand-700 active:scale-[0.99] text-white font-extrabold rounded-2xl shadow-lg shadow-brand-500/30 hover:shadow-xl transition-all flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm uppercase tracking-wider"
+                        className="w-full py-3.5 px-3 sm:px-5 bg-[#FF6B1A] hover:bg-[#E05507] active:scale-[0.99] text-white font-extrabold rounded-2xl shadow-lg shadow-[#FF6B1A]/30 hover:shadow-xl transition-all flex items-center justify-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm uppercase tracking-wider"
                       >
                         {isAuthenticated ? (
                           <>
@@ -313,33 +315,33 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                   </div>
 
                   {copied && (
-                    <div className="text-center text-xs text-emerald-600 font-semibold">
+                    <div className="text-center text-xs text-[#16A34A] font-semibold">
                       Product link copied to clipboard!
                     </div>
                   )}
 
-                  {/* Phone Hotline CTA Button (Ref 1: +8801571484593) */}
+                  {/* Phone Hotline CTA Button */}
                   <a
-                    href="tel:+8801571484593"
-                    className="w-full py-3 px-4 rounded-2xl border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800 font-bold flex items-center justify-center space-x-2 text-xs transition-colors"
+                    href="tel:+919509075612"
+                    className="w-full py-3 px-4 rounded-2xl border-2 border-[#E5E7EB] hover:border-[#2563EB] hover:bg-[#EFF6FF]/50 text-[#1F2937] font-bold flex items-center justify-center space-x-2 text-xs transition-colors"
                   >
-                    <Phone className="w-4 h-4 text-brand-600 shrink-0" />
-                    <span className="truncate">Order via Phone: +880 1571 484593 / +1 (800) 555-TECH</span>
+                    <Phone className="w-4 h-4 text-[#2563EB] shrink-0" />
+                    <span className="truncate">Order via Phone: +91 95090 75612 / +1 (800) 555-TECH</span>
                   </a>
                 </div>
 
-                {/* Trust mini-strip (Responsive 1-col on mobile, 3-col on sm) */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-6 border-t border-slate-100 text-[11px] text-slate-600">
+                {/* Trust mini-strip */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-6 border-t border-[#E5E7EB] text-[11px] text-[#6B7280]">
                   <div className="flex items-center space-x-2">
-                    <ShieldCheck className="w-4 h-4 text-brand-600 shrink-0" />
+                    <ShieldCheck className="w-4 h-4 text-[#16A34A] shrink-0" />
                     <span>Official Manufacturer Warranty</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Truck className="w-4 h-4 text-brand-600 shrink-0" />
+                    <Truck className="w-4 h-4 text-[#2563EB] shrink-0" />
                     <span>Express Global Dispatch</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RotateCcw className="w-4 h-4 text-brand-600 shrink-0" />
+                    <RotateCcw className="w-4 h-4 text-[#2563EB] shrink-0" />
                     <span>30 Days Replacement Guarantee</span>
                   </div>
                 </div>

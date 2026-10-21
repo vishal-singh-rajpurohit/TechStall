@@ -1,0 +1,106 @@
+# ==========================================
+# Development Docker Compose Stack
+# ==========================================
+# Runs all 4 services with bind mounts and hot-reloading.
+# Usage: docker compose -f docker-compose.dev.yml up -d --build
+
+services:
+  postgres_vector:
+    image: pgvector/pgvector:pg16
+    container_name: semantic_pgvector_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-semantic_ecommerce}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgvector_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-semantic_ecommerce}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - semantic_net_dev
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile.dev
+    container_name: semantic_backend_dev
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres_vector:5432/${POSTGRES_DB:-semantic_ecommerce}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-dayat1ivt}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-748315739666866}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-FJnFr7XIrZ6pea03JrDn71gGJxo}
+      EMBEDDING_MODEL_NAME: ${EMBEDDING_MODEL_NAME:-BAAI/bge-base-en-v1.5}
+      HF_TOKEN: ${HF_TOKEN:-}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+    volumes:
+      - ./Backend:/app
+    depends_on:
+      postgres_vector:
+        condition: service_healthy
+    networks:
+      - semantic_net_dev
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile.dev
+    container_name: semantic_frontend_dev
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_BACKEND_API_URL: ${NEXT_PUBLIC_BACKEND_API_URL:-http://localhost:8000}
+      BACKEND_API_URL: http://backend:8000
+      NEXTAUTH_URL: ${FRONTEND_NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-super-secret-semantic-ecommerce-key-2026}
+      NEXT_PUBLIC_RAZORPAY_KEY_ID: ${NEXT_PUBLIC_RAZORPAY_KEY_ID:-rzp_test_51aBcDeFgHiJkL}
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - semantic_net_dev
+
+  seller_dashboard:
+    build:
+      context: ./Seller_dahsboard
+      dockerfile: Dockerfile.dev
+    container_name: semantic_seller_dev
+    restart: unless-stopped
+    ports:
+      - "${SELLER_PORT:-3002}:3001"
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_SELLER_API_URL:-http://localhost:8000/api/v1}
+      BACKEND_API_URL: http://backend:8000
+      NEXTAUTH_URL: ${SELLER_NEXTAUTH_URL:-http://localhost:3002}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-super-secret-semantic-ecommerce-key-2026}
+    volumes:
+      - ./Seller_dahsboard:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - semantic_net_dev
+
+volumes:
+  pgvector_dev_data:
+    driver: local
+
+networks:
+  semantic_net_dev:
+    driver: bridge

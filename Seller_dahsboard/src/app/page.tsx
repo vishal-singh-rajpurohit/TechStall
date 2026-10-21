@@ -24,7 +24,7 @@ export default function DashboardOverviewPage() {
           title="Total Gross Revenue"
           value={`₹${totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
           subtitle="Net after refunds"
-          change="+14.2%"
+          change={totalOrders > 0 ? '+14.2%' : undefined}
           isPositive={true}
           icon={IndianRupee}
           iconBgColor="bg-emerald-50"
@@ -35,7 +35,7 @@ export default function DashboardOverviewPage() {
           title="Total Orders Processed"
           value={totalOrders.toString()}
           subtitle="Customer transactions"
-          change="+8.5%"
+          change={totalOrders > 0 ? '+8.5%' : undefined}
           isPositive={true}
           icon={ShoppingBag}
           iconBgColor="bg-blue-50"
@@ -48,8 +48,8 @@ export default function DashboardOverviewPage() {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}`}
-          subtitle="High-ticket accessories"
-          change="+5.1%"
+          subtitle={totalOrders > 0 ? 'Hardware and components' : 'Per transaction average'}
+          change={totalOrders > 0 ? '+5.1%' : undefined}
           isPositive={true}
           icon={TrendingUp}
           iconBgColor="bg-purple-50"
@@ -59,8 +59,8 @@ export default function DashboardOverviewPage() {
         <MetricCard
           title="Low Stock Warnings"
           value={`${lowStockCount} Items`}
-          subtitle={`Across ${totalProductsCount} SKUs`}
-          change={lowStockCount > 0 ? 'Requires Restock' : 'Healthy'}
+          subtitle={totalProductsCount === 0 ? 'No products listed' : `Across ${totalProductsCount} SKUs`}
+          change={totalProductsCount === 0 ? undefined : (lowStockCount > 0 ? 'Requires Restock' : 'Healthy')}
           isPositive={lowStockCount === 0}
           isAlert={lowStockCount > 0}
           icon={lowStockCount > 0 ? AlertTriangle : Boxes}

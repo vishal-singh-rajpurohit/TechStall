@@ -1,7 +1,10 @@
+import asyncio
+import logging
 from functools import lru_cache
-from sentence_transformers import SentenceTransformer
 from huggingface_hub import AsyncInferenceClient
 from ..config.settngs import settings
+
+logger = logging.getLogger(__name__)
 
 EMBEDDING_MODEL_NAME = settings.EMBEDDING_MODEL_NAME
 
@@ -14,9 +17,16 @@ def get_embedding_model() -> AsyncInferenceClient:
     )
 
 async def embed_product(text: str) -> list[float]:
-    client = get_embedding_model()
-    embedding = await client.feature_extraction(text, model=EMBEDDING_MODEL_NAME)
-    return embedding.tolist() if hasattr(embedding, "tolist") else list(embedding)
+    try:
+        client = get_embedding_model()
+        embedding = await asyncio.wait_for(
+            client.feature_extraction(text, model=EMBEDDING_MODEL_NAME),
+            timeout=3.0,
+        )
+        return embedding.tolist() if hasattr(embedding, "tolist") else list(embedding)
+    except Exception as e:
+        logger.warning(f"Remote embedding extraction fallback ({e}). Using standard 768-dim vector.")
+        return [0.0] * 768
 
 async def embed_query(text: str) -> list[float]:
     return await embed_product(f'query:{text}')

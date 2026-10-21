@@ -13,7 +13,7 @@ import { MobileNav } from '@/components/layout/MobileNav';
 import { NavigationProgressBar } from '@/components/layout/NavigationProgressBar';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://techstall-computer-accessories.vercel.app'),
+  metadataBase: new URL('https://e-com.vishalsingh.me'),
   title: {
     default: 'TechStall | Certified Computer Accessories, 4K Monitors, Laptops & SSDs',
     template: '%s | TechStall Computer Hub',
@@ -77,7 +77,7 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'TechStall Computer Accessories',
-              url: 'https://techstall-computer-accessories.vercel.app',
+              url: 'https://e-com.vishalsingh.me',
               logo: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=200',
               contactPoint: {
                 '@type': 'ContactPoint',
