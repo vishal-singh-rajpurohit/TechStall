@@ -9,7 +9,6 @@ set -e
 DOMAIN="seller.vishalsingh.me"
 EMAIL="admin@vishalsingh.me"
 COMPOSE_FILE="docker-compose.prod.yml"
-DATA_PATH="./certbot_data"
 
 echo "====================================================================="
 echo " Starting TLS Certificate Setup for $DOMAIN"
@@ -28,44 +27,41 @@ if [ ! -f "nginx/default.conf" ]; then
 fi
 
 echo "1. Checking existing certificate status..."
-# Check if real certificate already exists in certbot volume
-EXISTS=$(docker compose -f $COMPOSE_FILE run --rm --entrypoint "sh -c 'test -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem && echo 1 || echo 0'" certbot 2>/dev/null || echo 0)
+IS_LETSENCRYPT=$(docker compose -f $COMPOSE_FILE run --rm --entrypoint \
+  "sh -c 'openssl x509 -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem -issuer -noout 2>/dev/null | grep -i \"Let.s Encrypt\" || true'" certbot 2>/dev/null || true)
 
-if [ "$EXISTS" = "1" ]; then
-    echo " [INFO] Existing certificate found for $DOMAIN. Reloading Nginx..."
+if [ -n "$IS_LETSENCRYPT" ]; then
+    echo " [INFO] Active Let's Encrypt certificate found for $DOMAIN. Reloading Nginx..."
     docker compose -f $COMPOSE_FILE exec nginx nginx -s reload || true
     echo " Certificate is active and valid."
     exit 0
 fi
 
-echo "2. Creating temporary dummy certificate for Nginx startup..."
+echo "2. Ensuring certificate path exists (dummy bootstrap if needed)..."
 docker compose -f $COMPOSE_FILE run --rm --entrypoint "\
-  sh -c 'mkdir -p /etc/letsencrypt/live/$DOMAIN && \
-  openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-    -keyout /etc/letsencrypt/live/$DOMAIN/privkey.pem \
-    -out /etc/letsencrypt/live/$DOMAIN/fullchain.pem \
-    -subj \"/CN=localhost\"'" certbot
+  sh -c 'if [ ! -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then \
+    mkdir -p /etc/letsencrypt/live/$DOMAIN && \
+    openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
+      -keyout /etc/letsencrypt/live/$DOMAIN/privkey.pem \
+      -out /etc/letsencrypt/live/$DOMAIN/fullchain.pem \
+      -subj \"/CN=localhost\"; \
+  fi'" certbot
 
-echo "3. Starting Nginx with dummy certificate..."
+echo "3. Starting Nginx..."
 docker compose -f $COMPOSE_FILE up -d nginx
 
-echo "4. Removing dummy certificate before requesting real certificate..."
-docker compose -f $COMPOSE_FILE run --rm --entrypoint "\
-  rm -Rf /etc/letsencrypt/live/$DOMAIN && \
-  rm -Rf /etc/letsencrypt/archive/$DOMAIN && \
-  rm -Rf /etc/letsencrypt/renewal/$DOMAIN.conf" certbot
-
-echo "5. Requesting Let's Encrypt production certificate for $DOMAIN..."
+echo "4. Requesting Let's Encrypt production certificate for $DOMAIN..."
 docker compose -f $COMPOSE_FILE run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
+    --cert-name $DOMAIN \
     --email $EMAIL \
     -d $DOMAIN \
-    --rsa-key-size 4096 \
     --agree-tos \
     --no-eff-email \
+    --non-interactive \
     --force-renewal" certbot
 
-echo "6. Reloading Nginx with the verified Let's Encrypt certificate..."
+echo "5. Reloading Nginx with the verified Let's Encrypt certificate..."
 docker compose -f $COMPOSE_FILE exec nginx nginx -s reload
 
 echo "====================================================================="
