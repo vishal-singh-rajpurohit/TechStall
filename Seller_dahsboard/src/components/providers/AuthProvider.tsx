@@ -33,7 +33,7 @@ function AuthTokenSync({ children }: { children: React.ReactNode }) {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider basePath="/admin/api/auth">
       <AuthTokenSync>{children}</AuthTokenSync>
     </SessionProvider>
   );

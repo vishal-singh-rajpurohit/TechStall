@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   Package,
   Clock,
@@ -52,7 +51,8 @@ export default function CustomerOrdersPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await orderAPI.getOrders();
+      const token = (session as any)?.accessToken || (typeof window !== 'undefined' ? localStorage.getItem('access_token') : null);
+      const data = await orderAPI.getOrders(token);
       setOrders(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.message || 'Failed to load order history.');
@@ -71,7 +71,8 @@ export default function CustomerOrdersPage() {
     if (!confirm('Are you sure you want to cancel this order?')) return;
     setCancellingId(orderId);
     try {
-      await orderAPI.cancelOrder(orderId, 'Cancelled by customer');
+      const token = (session as any)?.accessToken || (typeof window !== 'undefined' ? localStorage.getItem('access_token') : null);
+      await orderAPI.cancelOrder(orderId, 'Cancelled by customer', token);
       await fetchOrders();
     } catch (err: any) {
       alert(err.message || 'Failed to cancel order.');
@@ -86,6 +87,7 @@ export default function CustomerOrdersPage() {
     setSuccessMessage(null);
 
     try {
+      const token = (session as any)?.accessToken || (typeof window !== 'undefined' ? localStorage.getItem('access_token') : null);
       await launchRazorpayPayment({
         orderId: order.id,
         razorpayOrderId: order.payment?.razorpay_order_id,
@@ -103,7 +105,8 @@ export default function CustomerOrdersPage() {
               order.id,
               rzpRes.razorpay_payment_id,
               rzpRes.razorpay_signature,
-              rzpRes.razorpay_order_id
+              rzpRes.razorpay_order_id,
+              token
             );
             setSuccessMessage(`Payment verified successfully for Order #${String(order.id).slice(0, 8).toUpperCase()}!`);
             await fetchOrders();
@@ -224,7 +227,10 @@ export default function CustomerOrdersPage() {
         <div className="space-y-6">
           {orders.map((order) => {
             const isPending = order.status === 'PENDING';
-            const isDelivered = order.status === 'DELIEVERED';
+            const isConfirmed = order.status === 'CONFORMED' || order.status === 'CONFIRMED';
+            const isShipped = order.status === 'SHIPPED';
+            const isOutForDelivery = order.status === 'OUT_FOR_DELIVERY';
+            const isDelivered = order.status === 'DELIEVERED' || order.status === 'DELIVERED';
             const isCancelled = order.status === 'CANCELLED';
             const isVerified = order.isVerified;
 
@@ -284,66 +290,87 @@ export default function CustomerOrdersPage() {
                       className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold ${
                         isDelivered
                           ? 'bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]'
+                          : isConfirmed
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                          : isShipped || isOutForDelivery
+                          ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                           : isCancelled
                           ? 'bg-red-50 text-[#DC2626] border border-red-200'
                           : 'bg-amber-50 text-amber-800 border border-amber-200'
                       }`}
                     >
                       {isDelivered && <CheckCircle2 className="w-3.5 h-3.5" />}
+                      {(isShipped || isOutForDelivery) && <Truck className="w-3.5 h-3.5" />}
+                      {isConfirmed && <Check className="w-3.5 h-3.5" />}
                       {isCancelled && <XCircle className="w-3.5 h-3.5" />}
                       {isPending && <Clock className="w-3.5 h-3.5" />}
-                      <span>{order.status}</span>
+                      <span>
+                        {isConfirmed
+                          ? 'CONFIRMED'
+                          : isDelivered
+                          ? 'DELIVERED'
+                          : order.status}
+                      </span>
                     </span>
                   </div>
                 </div>
 
                 {/* Items in this Order */}
                 <div className="space-y-3">
-                  {order.items?.map((it: any) => (
-                    <div
-                      key={it.id}
-                      className="flex items-center space-x-4 p-3 bg-slate-50/70 rounded-2xl border border-slate-100"
-                    >
-                      <div className="relative w-16 h-16 bg-white rounded-xl overflow-hidden shrink-0 border border-slate-200">
-                        {it.product?.images?.[0] ? (
-                          <Image
-                            src={it.product.images[0]}
-                            alt={it.product.title || 'Product'}
-                            fill
-                            className="object-cover"
-                            sizes="64px"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-300">
-                            <Package className="w-6 h-6" />
-                          </div>
-                        )}
+                  {order.items?.map((it: any) => {
+                    const firstImg = it.product?.images?.[0];
+                    return (
+                      <div
+                        key={it.id}
+                        className="flex items-center space-x-4 p-3 bg-slate-50/70 rounded-2xl border border-slate-100"
+                      >
+                        <div className="relative w-16 h-16 bg-white rounded-xl overflow-hidden shrink-0 border border-slate-200 flex items-center justify-center">
+                          {firstImg ? (
+                            <img
+                              src={firstImg}
+                              alt={it.product?.title || 'Product'}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <Package className="w-6 h-6 text-slate-300" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <Link
+                            href={`/products/${it.productId || it.product?.id}`}
+                            className="text-xs sm:text-sm font-semibold text-slate-900 hover:text-[#2563EB] line-clamp-1 transition-colors"
+                          >
+                            {it.product?.title || 'Certified Hardware Item'}
+                          </Link>
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            Quantity: {it.quantity} × {formatPrice(it.item_price || it.product?.selling_price || 0)}
+                          </p>
+                        </div>
+                        <span className="text-xs sm:text-sm font-bold text-slate-900">
+                          {formatPrice((it.item_price || it.product?.selling_price || 0) * (it.quantity || 1))}
+                        </span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <Link
-                          href={`/products/${it.productId || it.product?.id}`}
-                          className="text-xs sm:text-sm font-semibold text-slate-900 hover:text-[#2563EB] line-clamp-1 transition-colors"
-                        >
-                          {it.product?.title || 'Certified Hardware Item'}
-                        </Link>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          Quantity: {it.quantity} × {formatPrice(it.item_price || it.product?.selling_price || 0)}
-                        </p>
-                      </div>
-                      <span className="text-xs sm:text-sm font-bold text-slate-900">
-                        {formatPrice((it.item_price || 0) * (it.quantity || 1))}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Footer Address & Razorpay Pay Now / Cancel Buttons */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>
-                      Shipping to: <strong>{order.address}, {order.city} ({order.pin_code})</strong>
-                    </span>
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>
+                        Shipping to: <strong>{order.address}, {order.city} ({order.pin_code})</strong>
+                      </span>
+                    </div>
+                    {order.payment?.razorpay_payment_id && (
+                      <p className="text-[11px] text-slate-500 font-mono">
+                        Payment ID: <span className="text-slate-700">{order.payment.razorpay_payment_id}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex items-center space-x-3">

@@ -70,7 +70,20 @@ def _format_order_response(order: Orders) -> OrderResponse:
     items_response = []
     if order.items:
         for item in order.items:
-            prod_summary = ProductSummary.model_validate(item.product) if item.product else None
+            prod_summary = None
+            if item.product:
+                img_list = list(item.product.images or [])
+                if not img_list and hasattr(item.product, "media") and item.product.media:
+                    img_list = [m.url for m in item.product.media if getattr(m, "media_type", "image") == "image"]
+                prod_summary = ProductSummary(
+                    id=item.product.id,
+                    title=item.product.title,
+                    price=item.product.price,
+                    selling_price=item.product.selling_price,
+                    stock=item.product.stock,
+                    brand=item.product.brand or "Generic",
+                    images=img_list,
+                )
             price = item.product.selling_price if item.product else 0.0
             items_response.append(
                 OrderItemResponse(
@@ -234,7 +247,7 @@ async def place_order(
         select(Orders)
         .where(Orders.id == new_order.id)
         .options(
-            selectinload(Orders.items).selectinload(OrderItems.product),
+            selectinload(Orders.items).selectinload(OrderItems.product).selectinload(Products.media),
             selectinload(Orders.payments),
         )
     )
@@ -253,7 +266,7 @@ async def list_user_orders(
         select(Orders)
         .where(Orders.userId == current_user.id)
         .options(
-            selectinload(Orders.items).selectinload(OrderItems.product),
+            selectinload(Orders.items).selectinload(OrderItems.product).selectinload(Products.media),
             selectinload(Orders.payments),
         )
         .order_by(Orders.created_at.desc())
@@ -274,7 +287,7 @@ async def get_order_details(
         select(Orders)
         .where(Orders.id == order_id, Orders.userId == current_user.id)
         .options(
-            selectinload(Orders.items).selectinload(OrderItems.product),
+            selectinload(Orders.items).selectinload(OrderItems.product).selectinload(Products.media),
             selectinload(Orders.payments),
         )
     )
@@ -300,7 +313,7 @@ async def cancel_order(
         select(Orders)
         .where(Orders.id == order_id, Orders.userId == current_user.id)
         .options(
-            selectinload(Orders.items).selectinload(OrderItems.product),
+            selectinload(Orders.items).selectinload(OrderItems.product).selectinload(Products.media),
             selectinload(Orders.payments),
         )
     )
@@ -341,7 +354,7 @@ async def verify_order(
         select(Orders)
         .where(Orders.id == payload.order_id, Orders.userId == current_user.id)
         .options(
-            selectinload(Orders.items).selectinload(OrderItems.product),
+            selectinload(Orders.items).selectinload(OrderItems.product).selectinload(Products.media),
             selectinload(Orders.payments),
         )
     )
@@ -393,7 +406,7 @@ async def pay_order(
         select(Orders)
         .where(Orders.id == payload.order_id, Orders.userId == current_user.id)
         .options(
-            selectinload(Orders.items).selectinload(OrderItems.product),
+            selectinload(Orders.items).selectinload(OrderItems.product).selectinload(Products.media),
             selectinload(Orders.payments),
         )
     )
@@ -437,7 +450,7 @@ async def pay_order(
         select(Orders)
         .where(Orders.id == order.id)
         .options(
-            selectinload(Orders.items).selectinload(OrderItems.product),
+            selectinload(Orders.items).selectinload(OrderItems.product).selectinload(Products.media),
             selectinload(Orders.payments),
         )
     )

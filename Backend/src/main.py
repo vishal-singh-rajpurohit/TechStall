@@ -9,11 +9,17 @@ from pydantic import Field, BaseModel
 from .db.desp import get_db
 from .db.db import engine, Base
 from .routes import auth, seller, shop, cart, product, order
+from .controllers import browse
 from .config.settngs import settings
 from .utils.embedding import get_embedding_model
 from . import models
 
-app = FastAPI(title="Semantic E-Commerce API")
+app = FastAPI(
+    title="Semantic E-Commerce API",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,6 +28,21 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+@app.get("/api/health", tags=["Health"])
+@app.get("/health", tags=["Health"])
+async def api_health():
+    return {"status": "healthy", "service": "FastAPI Semantic E-Commerce Backend"}
+
+@app.get("/api/", tags=["Health"])
+@app.get("/", tags=["Health"])
+async def api_root():
+    return {
+        "message": "Semantic E-Commerce API Gateway",
+        "version": settings.VERSION,
+        "docs": "/api/docs",
+        "health": "/api/health",
+    }
 
 @app.on_event("startup")
 async def create_tables():
@@ -71,3 +92,11 @@ app.include_router(product.router, prefix=f'/api/{v1}/product')
 app.include_router(cart.router, prefix=f'/api/{v1}/cart')
 app.include_router(order.router, prefix=f'/api/{v1}/order')
 app.include_router(shop.router, prefix=f'/api/{v1}')
+
+@app.get(f"/api/{v1}/categories", tags=["SHOP"])
+async def root_categories(db: AsyncSession = Depends(get_db)):
+    return await browse.list_all_categories(db=db)
+
+@app.get(f"/api/{v1}/brands", tags=["SHOP"])
+async def root_brands(db: AsyncSession = Depends(get_db)):
+    return await browse.list_all_brands(db=db)

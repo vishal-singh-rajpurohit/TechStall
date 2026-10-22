@@ -28,6 +28,10 @@ export async function resolveBackendUrl(): Promise<string> {
   return cachedBackendUrl;
 }
 
+const isSecure =
+  process.env.NODE_ENV === 'production' &&
+  Boolean(process.env.NEXTAUTH_URL?.startsWith('https://'));
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -95,12 +99,50 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET || 'super-secret-semantic-ecommerce-key-2026',
-  useSecureCookies: false, // ensures cookie works over http in localhost and dev environments
+  useSecureCookies: isSecure,
+  cookies: {
+    sessionToken: {
+      name: isSecure ? '__Secure-seller.session-token' : 'seller.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/admin',
+        secure: isSecure,
+      },
+    },
+    callbackUrl: {
+      name: isSecure ? '__Secure-seller.callback-url' : 'seller.callback-url',
+      options: {
+        sameSite: 'lax',
+        path: '/admin',
+        secure: isSecure,
+      },
+    },
+    csrfToken: {
+      name: isSecure ? '__Host-seller.csrf-token' : 'seller.csrf-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/admin',
+        secure: isSecure,
+      },
+    },
+  },
   pages: {
     signIn: '/login',
     error: '/login',
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith('/')) {
+        const origin = new URL(baseUrl).origin;
+        if (url.startsWith('/admin')) return `${origin}${url}`;
+        return `${origin}/admin${url}`;
+      } else if (new URL(url).origin === new URL(baseUrl).origin) {
+        return url;
+      }
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;

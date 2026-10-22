@@ -3,7 +3,7 @@
 # ==========================================
 
 # Stage 1: Build dependencies
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim-bookworm AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -21,7 +21,7 @@ COPY requirements.txt .
 RUN pip install --prefix=/install --no-cache-dir -r requirements.txt
 
 # Stage 2: Production runner
-FROM python:3.12-slim AS runner
+FROM python:3.12-slim-bookworm AS runner
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -53,6 +53,6 @@ EXPOSE 8000
 
 # Container healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:8000/api/v1/auth/seller/ || exit 1
+    CMD curl -f http://localhost:8000/api/health || exit 1
 
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

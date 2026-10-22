@@ -120,6 +120,7 @@ async def upload_product_media(
 
 
 @router.post("/new-product", status_code=status.HTTP_201_CREATED)
+@router.post("/add-product", status_code=status.HTTP_201_CREATED)
 async def create_new_product(
     payload: NewProductRequest,
     current_seller: Seller = Depends(seller.get_current_seller),
@@ -213,6 +214,8 @@ async def unlist_product_by_path(
 
 
 @router.get("/get-product", status_code=status.HTTP_200_OK)
+@router.get("/my-products", status_code=status.HTTP_200_OK)
+@router.get("/products", status_code=status.HTTP_200_OK)
 async def get_seller_product_catalog(
     product_id: Optional[uuid.UUID] = Query(None),
     current_seller: Seller = Depends(seller.get_current_seller),

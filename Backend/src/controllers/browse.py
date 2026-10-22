@@ -212,3 +212,19 @@ async def get_products_by_category_paginated(
         total_pages=total_pages,
         category=cat,
     )
+
+
+async def list_all_categories(db: AsyncSession) -> List[dict]:
+    """Retrieve all available categories."""
+    stmt = select(Category).order_by(Category.title.asc())
+    res = await db.execute(stmt)
+    categories = res.scalars().all()
+    return [{"id": str(c.id), "title": c.title} for c in categories]
+
+
+async def list_all_brands(db: AsyncSession) -> List[str]:
+    """Retrieve all unique active product brands."""
+    stmt = select(Products.brand).where(Products.isActive == True, Products.brand.isnot(None)).distinct().order_by(Products.brand.asc())
+    res = await db.execute(stmt)
+    return [b[0] for b in res.all() if b[0]]
+

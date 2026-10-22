@@ -151,7 +151,7 @@ export function Sidebar() {
               </div>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={() => signOut({ callbackUrl: '/admin/login' })}
               title="Sign Out"
               className="p-1 text-slate-400 hover:text-red-400 hover:bg-[#122B4F] rounded transition-colors ml-1 shrink-0"
             >
@@ -171,7 +171,7 @@ export function Sidebar() {
         )}
 
         <a
-          href="http://localhost:3000"
+          href={process.env.NEXT_PUBLIC_STOREFRONT_URL || '/'}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#071527] hover:bg-[#122B4F] text-slate-300 hover:text-white text-xs font-bold transition-all border border-[#122B4F]"
@@ -180,7 +180,7 @@ export function Sidebar() {
             <ExternalLink className="w-4 h-4 text-[#FF6B1A]" />
             <span>Customer Storefront</span>
           </div>
-          <span className="text-[10px] text-slate-400">:3000</span>
+          <span className="text-[10px] text-slate-400">Live</span>
         </a>
 
         <div className="px-2 text-[10px] text-slate-400 flex items-center justify-between">

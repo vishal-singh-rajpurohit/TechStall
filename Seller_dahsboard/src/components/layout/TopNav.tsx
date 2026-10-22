@@ -199,7 +199,7 @@ export function TopNav({ onAddProductClick }: TopNavProps) {
                 </span>
               </div>
               <button
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={() => signOut({ callbackUrl: '/admin/login' })}
                 title="Sign Out of Merchant Portal"
                 className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-1"
               >

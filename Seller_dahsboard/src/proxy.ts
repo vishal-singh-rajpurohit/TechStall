@@ -21,7 +21,17 @@ export interface AuthCheckResult {
 export async function checkAuthentication(req: NextRequest): Promise<AuthCheckResult> {
   try {
     const secret = process.env.NEXTAUTH_SECRET || 'super-secret-semantic-ecommerce-key-2026';
-    const token = await getToken({ req, secret });
+    const isHttps =
+      process.env.NODE_ENV === 'production' &&
+      (Boolean(process.env.NEXTAUTH_URL?.startsWith('https://')) ||
+        req.headers.get('x-forwarded-proto') === 'https');
+    const customCookie = isHttps ? '__Secure-seller.session-token' : 'seller.session-token';
+
+    let token = await getToken({ req, secret, cookieName: customCookie });
+    if (!token) {
+      // Fallback to standard cookie names if present
+      token = await getToken({ req, secret });
+    }
 
     if (!token) {
       // Check Bearer token in Authorization header as fallback
@@ -72,7 +82,7 @@ export async function checkAuthentication(req: NextRequest): Promise<AuthCheckRe
 export async function authProxy(req: NextRequest): Promise<NextResponse> {
   const { pathname } = req.nextUrl;
 
-  // Paths exempt from authentication
+  // Paths exempt from authentication (relative to basePath)
   const isPublicPath =
     pathname.startsWith('/login') ||
     pathname.startsWith('/api/auth') ||
@@ -82,7 +92,7 @@ export async function authProxy(req: NextRequest): Promise<NextResponse> {
 
   const authResult = await checkAuthentication(req);
 
-  // 1. If accessing protected dashboard pages without valid authentication -> redirect to /login
+  // 1. If accessing protected dashboard pages without valid authentication -> redirect to /admin/login
   if (!isPublicPath && !authResult.authenticated) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
@@ -90,16 +100,19 @@ export async function authProxy(req: NextRequest): Promise<NextResponse> {
         { status: 401 }
       );
     }
-    const loginUrl = new URL('/login', req.url);
+    const loginUrl = req.nextUrl.clone();
+    loginUrl.pathname = '/login';
     if (pathname !== '/') {
-      loginUrl.searchParams.set('callbackUrl', pathname + req.nextUrl.search);
+      loginUrl.searchParams.set('callbackUrl', `/admin${pathname}${req.nextUrl.search}`);
     }
     return NextResponse.redirect(loginUrl);
   }
 
-  // 2. If already authenticated and accessing /login -> redirect to dashboard home
+  // 2. If already authenticated and accessing /login -> redirect to dashboard home (/admin/)
   if (pathname.startsWith('/login') && authResult.authenticated) {
-    return NextResponse.redirect(new URL('/', req.url));
+    const homeUrl = req.nextUrl.clone();
+    homeUrl.pathname = '/';
+    return NextResponse.redirect(homeUrl);
   }
 
   // 3. Attach verified seller metadata to request headers for downstream components

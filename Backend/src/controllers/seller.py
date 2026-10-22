@@ -522,6 +522,8 @@ async def new_product(
 
     return {
         "message": "Product created successfully",
+        "id": str(full_prod.id),
+        "product_id": str(full_prod.id),
         "product": {
             "id": str(full_prod.id),
             "title": full_prod.title,

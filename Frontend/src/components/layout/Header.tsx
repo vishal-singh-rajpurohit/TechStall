@@ -377,7 +377,7 @@ export function Header() {
                     </div>
                     <div className="py-1 text-xs text-[#1F2937]">
                       <Link
-                        href="/products"
+                        href="/orders"
                         onClick={() => setIsUserMenuOpen(false)}
                         className="flex items-center px-4 py-2 hover:bg-[#EFF6FF] hover:text-[#2563EB] transition-colors"
                       >

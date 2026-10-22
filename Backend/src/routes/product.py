@@ -19,6 +19,18 @@ from ..db.desp import get_db
 router = APIRouter(tags=["PRODUCT"])
 
 
+@router.get("/categories", status_code=status.HTTP_200_OK)
+async def get_all_categories(db: AsyncSession = Depends(get_db)):
+    """Retrieve all available product categories."""
+    return await browse.list_all_categories(db=db)
+
+
+@router.get("/brands", status_code=status.HTTP_200_OK)
+async def get_all_brands(db: AsyncSession = Depends(get_db)):
+    """Retrieve all distinct product brands."""
+    return await browse.list_all_brands(db=db)
+
+
 @router.get("/get/products", status_code=status.HTTP_200_OK, response_model=List[ProductResponse])
 @router.get("/products", status_code=status.HTTP_200_OK, response_model=List[ProductResponse])
 async def get_all_products(
